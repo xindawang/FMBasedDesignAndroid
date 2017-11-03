@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+    <com.fengmap.FMDemoBaseMap.widget.NavigationBar
+        android:id="@+id/navigation_bar"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        app:title="@string/demo_title_basemap">
+    </com.fengmap.FMDemoBaseMap.widget.NavigationBar>
+
+
+    <com.fengmap.android.map.FMMapView
+        android:id="@+id/map_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/navigation_bar"/>
+
+    <Button
+        android:id="@+id/testStart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="起点"
+        android:onClick="testStart"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:id="@+id/t"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="终点"
+        android:onClick="testEnd"
+        android:layout_alignParentBottom="true"
+        android:layout_toRightOf="@+id/testStart"
+        android:layout_toEndOf="@+id/testStart" />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="导航"
+        android:onClick="testNavi"
+        android:layout_alignParentBottom="true"
+        android:layout_toLeftOf="@+id/testStart"
+        android:layout_toStartOf="@+id/testStart" />
+
+
+</RelativeLayout>

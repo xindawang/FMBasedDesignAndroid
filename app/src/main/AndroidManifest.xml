@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.fengmap.FMDemoBaseMap"
+          android:versionCode="1"
+          android:versionName="1.0">
+
+    <!-- 写入扩展存储，向扩展卡写入数据 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <!-- 读取设备外部存储空间 -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <!-- 访问网络，加载网络地图需要上网 -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- 允许程序访问有关GSM网络信息 -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+
+    <uses-sdk
+        android:minSdkVersion="9"
+        android:targetSdkVersion="22"/>
+
+    <application
+        android:name="com.fengmap.FMDemoBaseMap.DemoApplication"
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <!--这里输入秘钥-->
+        <meta-data
+            android:name="com.fengmap.mapapi.appkey"
+            android:value="c31d592ec3f0382fad927c86ae2aaa29"/>
+
+        <activity
+            android:name="com.fengmap.FMDemoBaseMap.MapApiDemoMain"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.fengmap.FMDemoBaseMap.map.FMMapBasic"
+            android:configChanges="orientation|keyboardHidden"/>
+
+        <activity
+            android:name="com.fengmap.FMDemoBaseMap.map.FMMapInitialize"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"/>
+
+        <activity
+            android:name="com.fengmap.FMDemoBaseMap.map.FMMapThemeSwitch"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"/>
+
+        <activity
+            android:name="com.fengmap.FMDemoBaseMap.map.FMMapOperation"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"/>
+
+        <activity
+            android:name="com.fengmap.FMDemoBaseMap.map.FMMapGroups"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"/>
+
+        <activity
+            android:name="com.fengmap.FMDemoBaseMap.map.FMMapLayers"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"/>
+
+        <activity
+            android:name="com.fengmap.FMDemoBaseMap.map.FMMap2D3D"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"/>
+
+        <activity
+            android:name="com.fengmap.FMDemoBaseMap.map.FMMapCoordTransform"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"/>
+
+    </application>
+
+</manifest>
