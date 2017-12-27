@@ -1,15 +1,22 @@
 package com.fengmap.FMDemoBaseMap.map;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
+
+import android.widget.Toast;
 
 import com.fengmap.FMDemoBaseMap.R;
+import com.fengmap.FMDemoBaseMap.RequestManager;
 import com.fengmap.FMDemoBaseMap.utils.FileUtils;
 import com.fengmap.FMDemoBaseMap.utils.ViewHelper;
 import com.fengmap.android.FMErrorMsg;
@@ -18,26 +25,47 @@ import com.fengmap.android.analysis.navi.FMNaviResult;
 import com.fengmap.android.data.OnFMDownloadProgressListener;
 import com.fengmap.android.exception.FMObjectException;
 import com.fengmap.android.map.FMMap;
-import com.fengmap.android.map.FMMapCoordZType;
 import com.fengmap.android.map.FMMapUpgradeInfo;
 import com.fengmap.android.map.FMMapView;
 import com.fengmap.android.map.FMPickMapCoordResult;
 import com.fengmap.android.map.event.OnFMMapClickListener;
 import com.fengmap.android.map.event.OnFMMapInitListener;
 import com.fengmap.android.map.geometry.FMMapCoord;
-import com.fengmap.android.map.geometry.FMScreenCoord;
 import com.fengmap.android.map.layer.FMImageLayer;
 import com.fengmap.android.map.layer.FMLineLayer;
-import com.fengmap.android.map.layer.FMLocationLayer;
-import com.fengmap.android.map.layer.FMTextLayer;
 import com.fengmap.android.map.marker.FMImageMarker;
 import com.fengmap.android.map.marker.FMLineMarker;
-import com.fengmap.android.map.marker.FMLocationMarker;
 import com.fengmap.android.map.marker.FMSegment;
-import com.fengmap.android.map.marker.FMTextMarker;
 
+//import net.sf.json.JSONObject;
+
+
+import org.apache.http.entity.StringEntity;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
+import static android.content.ContentValues.TAG;
 
 
 /**
@@ -52,11 +80,21 @@ public class FMMapBasic extends Activity implements OnFMMapInitListener, OnFMMap
     private FMMap mFMMap;
     private FMImageLayer mStImageLayer;
     private FMImageLayer mEndImageLayer;
-//    private FMLocationLayer mLocationLayer;
+    //    private FMLocationLayer mLocationLayer;
     private FMNaviAnalyser mNaviAnalyser;
     private FMLineLayer mLineLayer;
     private FMMapCoord stCoord;
     private FMMapCoord endCoord;
+
+    private WifiManager wifiManager;
+
+    private String positioningResult;
+
+
+    public static final MediaType MEDIA_TYPE_MARKDOWN
+            = MediaType.parse("text/x-markdown; charset=utf-8");
+
+    private final OkHttpClient client = new OkHttpClient();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -163,7 +201,9 @@ public class FMMapBasic extends Activity implements OnFMMapInitListener, OnFMMap
         mEndImageLayer.removeAll();
 
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.end);
-        stCoord = new FMMapCoord(12735847, 3569545);
+
+        String [] locInfo = positioningResult.split(",");
+        stCoord = new FMMapCoord(Double.parseDouble(locInfo[0]), Double.parseDouble(locInfo[1]));
         endCoord = mapCoordResult.getMapCoord();
         FMImageMarker mImageMarker = new FMImageMarker(mapCoordResult.getMapCoord(), bitmap);
         //设置图片宽高
@@ -207,13 +247,36 @@ public class FMMapBasic extends Activity implements OnFMMapInitListener, OnFMMap
 //            mFMMap.removeLayer(mLocationLayer); // 移除图层
 //            mLocationLayer = null;
         }
+        if (mLineLayer != null) {
+            mLineLayer.removeAll();
+        }
+        if (mEndImageLayer != null) {
+            mEndImageLayer.removeAll();
+        }
     }
 
     public void testStart(View view){
 
         clearImageLayer();
+        final HashMap<String, String> apEntities = init(this);
 
-        FMMapCoord centerCoord = new FMMapCoord(12735847, 3569545);
+        Thread httpRequest = new Thread(){
+            @Override
+            public void run(){
+                RequestManager requestManager = RequestManager.getInstance(FMMapBasic.this);
+                positioningResult = requestManager.requestSyn("loc",2,apEntities);
+            }
+        };
+
+        httpRequest.start();
+        try {
+            httpRequest.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        String [] locInfo = positioningResult.split(",");
+        FMMapCoord centerCoord = new FMMapCoord(Double.parseDouble(locInfo[0]), Double.parseDouble(locInfo[1]));
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.start);
         FMImageMarker mImageMarker = new FMImageMarker(centerCoord, bitmap);
 //设置图片宽高
@@ -242,32 +305,34 @@ public class FMMapBasic extends Activity implements OnFMMapInitListener, OnFMMap
         mStImageLayer.addMarker(mImageMarker);            //添加图片标志物
     }
 
-    public void testNavi(View view){
-        //得到路径分析器
+    public void testClear(View view){
+        clearImageLayer();
+    }
 
-
-        //添加模拟起始点
-        int stGroupId = 1;
-        FMMapCoord stCoord = new FMMapCoord(12735847, 3569545);
-        int endGroupId = 1;
-        FMMapCoord endCoord = new FMMapCoord(12735860, 3569545);
-
-        //根据起始点坐标和楼层id等信息进行路径规划
-        int type = mNaviAnalyser.analyzeNavi(stGroupId, stCoord, endGroupId, endCoord,
-                FMNaviAnalyser.FMNaviModule.MODULE_SHORTEST);
-        if (type == FMNaviAnalyser.FMRouteCalcuResult.ROUTE_SUCCESS) {
-            ArrayList<FMNaviResult> results = mNaviAnalyser.getNaviResults();
-            // 构造路径规划线所需数据
-            ArrayList<FMSegment> segments = new ArrayList<>();
-            for (FMNaviResult r : results) {
-                int groupId = r.getGroupId();
-                FMSegment s = new FMSegment(groupId, r.getPointList());
-                segments.add(s);
-            }
-            //添加LineMarker
-            FMLineMarker lineMarker = new FMLineMarker(segments);
-            mLineLayer.addMarker(lineMarker);
+    private HashMap<String, String> init(Context context) {
+        wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        openWifi();
+        wifiManager.startScan();
+        List<ScanResult> list = wifiManager.getScanResults();
+        if (list == null) {
+            Toast.makeText(this, "wifi未打开！", Toast.LENGTH_LONG).show();
         }
+        HashMap<String, String> apEntities = new HashMap<>();
+        for (ScanResult scanResult : list){
+            if (scanResult.SSID.contains("abc"))
+            apEntities.put(scanResult.SSID,String.valueOf(scanResult.level));
+        }
+        return apEntities;
+    }
+
+    /**
+     * 打开WIFI
+     */
+    private void openWifi() {
+        if (!wifiManager.isWifiEnabled()) {
+            wifiManager.setWifiEnabled(true);
+        }
+
     }
 
 }

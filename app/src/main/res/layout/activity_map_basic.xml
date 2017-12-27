@@ -22,27 +22,18 @@
         android:id="@+id/testStart"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="起点"
+        android:text="定位"
         android:onClick="testStart"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true" />
 
-    <Button
-        android:id="@+id/t"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="终点"
-        android:onClick="testEnd"
-        android:layout_alignParentBottom="true"
-        android:layout_toRightOf="@+id/testStart"
-        android:layout_toEndOf="@+id/testStart" />
 
     <Button
         android:id="@+id/button2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="导航"
-        android:onClick="testNavi"
+        android:text="清屏"
+        android:onClick="testClear"
         android:layout_alignParentBottom="true"
         android:layout_toLeftOf="@+id/testStart"
         android:layout_toStartOf="@+id/testStart" />
