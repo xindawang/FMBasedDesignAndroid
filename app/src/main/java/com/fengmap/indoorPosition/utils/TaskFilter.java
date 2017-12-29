@@ -1,4 +1,4 @@
-package com.fengmap.FMDemoBaseMap.utils;
+package com.fengmap.indoorPosition.utils;
 
 /**
  * @Email hezutao@fengmap.com

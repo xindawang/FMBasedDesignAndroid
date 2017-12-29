@@ -1,38 +1,39 @@
-package com.fengmap.FMDemoBaseMap.map;
+package com.fengmap.indoorPosition.map;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 
-import com.fengmap.FMDemoBaseMap.R;
-import com.fengmap.FMDemoBaseMap.utils.FileUtils;
-import com.fengmap.FMDemoBaseMap.utils.ViewHelper;
+import com.fengmap.indoorPosition.R;
+import com.fengmap.indoorPosition.utils.FileUtils;
+import com.fengmap.indoorPosition.utils.ViewHelper;
 import com.fengmap.android.FMErrorMsg;
 import com.fengmap.android.data.OnFMDownloadProgressListener;
 import com.fengmap.android.map.FMMap;
 import com.fengmap.android.map.FMMapUpgradeInfo;
 import com.fengmap.android.map.FMMapView;
-import com.fengmap.android.map.FMViewMode;
 import com.fengmap.android.map.event.OnFMMapInitListener;
+import com.fengmap.android.map.layer.FMLayer;
 
 /**
  * @Email hezutao@fengmap.com
  * @Version 2.0.0
- * @Description 2D 3D显示切换
- * <p>地图为2D模式时候,将会禁用手势倾斜功能</p>
+ * @Description 图层显示控制
+ * <p>地图加载后会自动创建{@link com.fengmap.android.map.layer.FMLabelLayer}和
+ * {@link com.fengmap.android.map.layer.FMFacilityLayer},可以在{@link FMMap#onMapInitListener#onMapInitSuccess(String)}
+ * 地图加载完成后，动态控制图层的显示与隐藏</p>
  */
-public class FMMap2D3D extends Activity implements OnFMMapInitListener, View.OnClickListener {
+public class FMMapLayers extends Activity implements OnFMMapInitListener, CompoundButton.OnCheckedChangeListener {
+
     private FMMapView mMapView;
     private FMMap mFMMap;
-    private Button[] mButtons = new Button[2];
-    private int mPosition = 1;
+    private int[] mLayerIds = {R.id.cb_layers_label, R.id.cb_layers_facility};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_2d3d);
+        setContentView(R.layout.activity_map_layers);
 
         openMapByPath();
     }
@@ -59,16 +60,18 @@ public class FMMap2D3D extends Activity implements OnFMMapInitListener, View.OnC
         //加载离线主题
         mFMMap.loadThemeByPath(FileUtils.getDefaultThemePath(this));
 
-        setViewMode();
+        int groupId = mFMMap.getFocusGroupId();
+        FMLayer[] layers = new FMLayer[2];
+        //获取标注图层
+        layers[0] = mFMMap.getFMLayerProxy().getFMLabelLayer(groupId);
+        //获取设施图层
+        layers[1] = mFMMap.getFMLayerProxy().getFMFacilityLayer(groupId);
 
-        LinearLayout view = ViewHelper.getView(FMMap2D3D.this, R.id.layout_mode);
-        for (int i = 0; i < view.getChildCount(); i++) {
-            mButtons[i] = (Button) view.getChildAt(i);
-            mButtons[i].setTag(i);
-            mButtons[i].setEnabled(true);
-            mButtons[i].setOnClickListener(this);
+        for (int i = 0; i < mLayerIds.length; i++) {
+            CheckBox checkBox = ViewHelper.getView(FMMapLayers.this, mLayerIds[i]);
+            checkBox.setTag(layers[i]);
+            checkBox.setOnCheckedChangeListener(this);
         }
-        mButtons[mPosition].setEnabled(false);
     }
 
     /**
@@ -100,46 +103,20 @@ public class FMMap2D3D extends Activity implements OnFMMapInitListener, View.OnC
     }
 
     @Override
-    public void onClick(View v) {
-        Button button = (Button) v;
-        int position = (int) button.getTag();
-        setPosition(position);
-        setViewMode();
-    }
-
-    /**
-     * 切换地图显示模式
-     */
-    private void setViewMode() {
-        if (mPosition == 0) {
-            mFMMap.setFMViewMode(FMViewMode.FMVIEW_MODE_2D); //设置地图2D显示模式
-        } else {
-            mFMMap.setFMViewMode(FMViewMode.FMVIEW_MODE_3D); //设置地图3D显示模式
-        }
-    }
-
-    /**
-     * 设置2D、3D选择效果
-     *
-     * @param position 按钮索引
-     */
-    private void setPosition(int position) {
-        if (mPosition == position) {
-            return;
-        }
-        mButtons[position].setEnabled(false);
-        mButtons[mPosition].setEnabled(true);
-        mPosition = position;
-    }
-
-    /**
-     * 地图销毁调用
-     */
-    @Override
     public void onBackPressed() {
         if (mFMMap != null) {
             mFMMap.onDestroy();
         }
         super.onBackPressed();
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        FMLayer layer = (FMLayer) buttonView.getTag();
+        if (layer != null) {
+            //设置控件是否显示true、隐藏false
+            layer.setVisible(isChecked);
+            mFMMap.updateMap();
+        }
     }
 }

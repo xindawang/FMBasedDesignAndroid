@@ -2,11 +2,11 @@
 <resources>
     <!-- NavigationBar -->
     <declare-styleable name="NavigationBar">
-        <attr name="background" format="reference"></attr>
-        <attr name="title" format="reference|string"></attr>
-        <attr name="leftBackground" format="reference"></attr>
-        <attr name="textSize" format="dimension"></attr>
-        <attr name="textColor" format="reference|color"></attr>
+        <attr name="NavigationBar_background" format="reference"></attr>
+        <attr name="NavigationBar_title" format="reference|string"></attr>
+        <attr name="NavigationBar_leftBackground" format="reference"></attr>
+        <attr name="NavigationBar_textSize" format="dimension"></attr>
+        <attr name="NavigationBar_textColor" format="reference|color"></attr>
     </declare-styleable>
 
 

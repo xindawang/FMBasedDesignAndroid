@@ -1,4 +1,4 @@
-package com.fengmap.FMDemoBaseMap;
+package com.fengmap.indoorPosition;
 
 import android.app.Application;
 

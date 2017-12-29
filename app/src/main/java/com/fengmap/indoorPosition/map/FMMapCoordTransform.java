@@ -1,51 +1,47 @@
-package com.fengmap.FMDemoBaseMap.map;
+package com.fengmap.indoorPosition.map;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.TextView;
 
-import com.fengmap.FMDemoBaseMap.R;
-import com.fengmap.FMDemoBaseMap.utils.FileUtils;
-import com.fengmap.FMDemoBaseMap.utils.ViewHelper;
+import com.fengmap.indoorPosition.R;
+import com.fengmap.indoorPosition.utils.FileUtils;
+import com.fengmap.indoorPosition.utils.ViewHelper;
 import com.fengmap.android.FMErrorMsg;
 import com.fengmap.android.data.OnFMDownloadProgressListener;
 import com.fengmap.android.map.FMMap;
+import com.fengmap.android.map.FMMapCoordZType;
 import com.fengmap.android.map.FMMapUpgradeInfo;
 import com.fengmap.android.map.FMMapView;
+import com.fengmap.android.map.FMPickMapCoordResult;
+import com.fengmap.android.map.event.OnFMMapClickListener;
 import com.fengmap.android.map.event.OnFMMapInitListener;
 import com.fengmap.android.map.geometry.FMMapCoord;
+import com.fengmap.android.map.geometry.FMScreenCoord;
+import com.fengmap.android.map.layer.FMImageLayer;
+import com.fengmap.android.map.marker.FMImageMarker;
 
 /**
  * @Email hezutao@fengmap.com
  * @Version 2.0.0
- * @Description 地图初始化设置
- * <p>在{@link FMMap#onMapInitListener#onMapInitSuccess(String)}中设置地图初始显示状态</p>
+ * @Description 地图坐标转换
+ * <p>地图提供了屏幕坐标转换为地图坐标{@link FMMap#toFMScreenCoord(int, FMMapCoordZType, FMMapCoord)},
+ * 地图坐标转换为屏幕坐标{@link FMMap#toFMMapCoord(int, FMScreenCoord)}</p>
  */
-public class FMMapInitialize extends Activity implements OnFMMapInitListener {
+public class FMMapCoordTransform extends Activity implements OnFMMapInitListener, OnFMMapClickListener {
 
     private FMMapView mMapView;
     private FMMap mFMMap;
-    private FMMapCoord CENTER_COORD = new FMMapCoord(1.296164E7, 4861800.0);
-    private int mLevel = 20;
-    private float mRotate = 60;
-    private float mTilt = 45;
-    private int mGroupId = 1;
+    private FMImageLayer mImageLayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_map_init);
+        setContentView(R.layout.activity_map_transform);
 
-        initView();
         openMapByPath();
     }
 
-    private void initView() {
-        String info = getResources().getString(R.string.map_init_tips, mGroupId, CENTER_COORD.x,
-                CENTER_COORD.y, mRotate, mTilt, mLevel);
-        TextView textView = ViewHelper.getView(FMMapInitialize.this, R.id.map_result);
-        textView.setText(info);
-    }
 
     /**
      * 加载地图数据
@@ -54,28 +50,26 @@ public class FMMapInitialize extends Activity implements OnFMMapInitListener {
         mMapView = (FMMapView) findViewById(R.id.map_view);
         mFMMap = mMapView.getFMMap();
         mFMMap.setOnFMMapInitListener(this);
+        mFMMap.setOnFMMapClickListener(this);
         //加载离线数据
         String path = FileUtils.getDefaultMapPath(this);
         mFMMap.openMapByPath(path);
     }
 
-
+    /**
+     * 地图加载成功回调事件
+     *
+     * @param path 地图所在sdcard路径
+     */
     @Override
     public void onMapInitSuccess(String path) {
         //加载离线主题
         mFMMap.loadThemeByPath(FileUtils.getDefaultThemePath(this));
-        //2D显示模式
-//        mFMMap.setFMViewMode(FMViewMode.FMVIEW_MODE_2D);
-        //缩放级别
-        mFMMap.setZoomLevel(mLevel, false);
-        //旋转角度
-        mFMMap.setRotateAngle(mRotate);
-        //倾角
-        mFMMap.setTiltAngle(mTilt);
-        //地图中心点
-        mFMMap.setMapCenter(CENTER_COORD);
-    }
 
+        //添加图片图层
+        mImageLayer = mFMMap.getFMLayerProxy().createFMImageLayer(mFMMap.getFocusGroupId());
+        mFMMap.addLayer(mImageLayer);
+    }
 
     /**
      * 地图加载失败回调事件
@@ -114,5 +108,31 @@ public class FMMapInitialize extends Activity implements OnFMMapInitListener {
             mFMMap.onDestroy();
         }
         super.onBackPressed();
+    }
+
+    @Override
+    public void onMapClick(float x, float y) {
+        mImageLayer.removeAll();
+        //添加图片标注
+        FMPickMapCoordResult mapCoordResult = mFMMap.pickMapCoord(512, 1024);
+        if (mapCoordResult != null) {
+            FMMapCoord mapCoord = mapCoordResult.getMapCoord();
+            FMImageMarker imageMarker = ViewHelper.buildImageMarker(getResources(), mapCoord);
+            mImageLayer.addMarker(imageMarker);
+        }
+
+        int groupId = mFMMap.getFocusGroupId();
+        //屏幕坐标转换为地图坐标
+        FMScreenCoord screenCoord = new FMScreenCoord(512, 1024);
+        FMMapCoord convertMapCoord = mFMMap.toFMMapCoord(groupId, screenCoord);
+
+        //地图坐标转换为屏幕坐标
+        FMScreenCoord convertScreenCoord = mFMMap.toFMScreenCoord(groupId,
+                FMMapCoordZType.MAPCOORDZ_MODEL, convertMapCoord);
+
+        //显示转换结果
+        TextView mapResult = ViewHelper.getView(FMMapCoordTransform.this, R.id.map_result);
+        mapResult.setText(getString(R.string.map_transform_tips, groupId, x, y, convertMapCoord.x, convertMapCoord.y,
+                convertScreenCoord.x, convertScreenCoord.y));
     }
 }

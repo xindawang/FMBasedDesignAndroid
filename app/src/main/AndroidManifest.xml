@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.fengmap.FMDemoBaseMap"
+    package="com.fengmap.indoorPosition"
     android:versionCode="1"
     android:versionName="1.0">
 
@@ -23,68 +23,82 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <uses-sdk
-        android:minSdkVersion="9"
+        android:minSdkVersion="11"
         android:targetSdkVersion="22"/>
 
     <application
-        android:name="com.fengmap.FMDemoBaseMap.DemoApplication"
+        android:name="com.fengmap.indoorPosition.DemoApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+
         <!--这里输入秘钥-->
         <meta-data
             android:name="com.fengmap.mapapi.appkey"
-            android:value="c31d592ec3f0382fad927c86ae2aaa29"/>
+            android:value="9d9ee0fab35733a039da7a9e6fa1e215"/>
 
         <activity
-            android:name="com.fengmap.FMDemoBaseMap.MapApiDemoMain"
-            android:configChanges="orientation|keyboardHidden"
-            android:screenOrientation="portrait">
+            android:name="com.fengmap.indoorPosition.HomeActivity"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.AppCompat">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
         <activity
-            android:name="com.fengmap.FMDemoBaseMap.map.FMMapBasic"
+            android:name="com.fengmap.indoorPosition.WifiListActivity"
+            android:theme="@style/Theme.AppCompat"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"/>
+
+        <activity
+            android:name="com.fengmap.indoorPosition.MapApiDemoMain"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait">
+        </activity>
+
+        <activity
+            android:name="com.fengmap.indoorPosition.map.FMMapBasic"
             android:configChanges="orientation|keyboardHidden"/>
 
         <activity
-            android:name="com.fengmap.FMDemoBaseMap.map.FMMapInitialize"
+            android:name="com.fengmap.indoorPosition.map.FMMapInitialize"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="portrait"/>
 
         <activity
-            android:name="com.fengmap.FMDemoBaseMap.map.FMMapThemeSwitch"
+            android:name="com.fengmap.indoorPosition.map.FMMapThemeSwitch"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="portrait"/>
 
         <activity
-            android:name="com.fengmap.FMDemoBaseMap.map.FMMapOperation"
+            android:name="com.fengmap.indoorPosition.map.FMMapOperation"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="portrait"/>
 
         <activity
-            android:name="com.fengmap.FMDemoBaseMap.map.FMMapGroups"
+            android:name="com.fengmap.indoorPosition.map.FMMapGroups"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="portrait"/>
 
         <activity
-            android:name="com.fengmap.FMDemoBaseMap.map.FMMapLayers"
+            android:name="com.fengmap.indoorPosition.map.FMMapLayers"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="portrait"/>
 
         <activity
-            android:name="com.fengmap.FMDemoBaseMap.map.FMMap2D3D"
+            android:name="com.fengmap.indoorPosition.map.FMMap2D3D"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="portrait"/>
 
         <activity
-            android:name="com.fengmap.FMDemoBaseMap.map.FMMapCoordTransform"
+            android:name="com.fengmap.indoorPosition.map.FMMapCoordTransform"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="portrait"/>
 

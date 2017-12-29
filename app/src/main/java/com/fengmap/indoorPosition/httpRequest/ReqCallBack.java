@@ -1,4 +1,4 @@
-package com.fengmap.FMDemoBaseMap;
+package com.fengmap.indoorPosition.httpRequest;
 
 /**
  * Created by ACER on 2017/12/22.

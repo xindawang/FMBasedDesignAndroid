@@ -5,12 +5,12 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
-    <com.fengmap.FMDemoBaseMap.widget.NavigationBar
+    <com.fengmap.indoorPosition.widget.NavigationBar
         android:id="@+id/navigation_bar"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         app:title="@string/demo_title_init">
-    </com.fengmap.FMDemoBaseMap.widget.NavigationBar>
+    </com.fengmap.indoorPosition.widget.NavigationBar>
 
     <com.fengmap.android.map.FMMapView
         android:id="@+id/map_view"

@@ -1,4 +1,4 @@
-package com.fengmap.FMDemoBaseMap.map;
+package com.fengmap.indoorPosition.map;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -8,9 +8,9 @@ import android.widget.CompoundButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
-import com.fengmap.FMDemoBaseMap.R;
-import com.fengmap.FMDemoBaseMap.utils.FileUtils;
-import com.fengmap.FMDemoBaseMap.utils.ViewHelper;
+import com.fengmap.indoorPosition.R;
+import com.fengmap.indoorPosition.utils.FileUtils;
+import com.fengmap.indoorPosition.utils.ViewHelper;
 import com.fengmap.android.FMErrorMsg;
 import com.fengmap.android.data.OnFMDownloadProgressListener;
 import com.fengmap.android.map.FMGroupInfo;

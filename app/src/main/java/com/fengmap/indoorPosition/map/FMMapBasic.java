@@ -1,24 +1,19 @@
-package com.fengmap.FMDemoBaseMap.map;
+package com.fengmap.indoorPosition.map;
 
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
 import android.view.View;
 
 import android.widget.Toast;
 
-import com.fengmap.FMDemoBaseMap.R;
-import com.fengmap.FMDemoBaseMap.RequestManager;
-import com.fengmap.FMDemoBaseMap.utils.FileUtils;
-import com.fengmap.FMDemoBaseMap.utils.ViewHelper;
+import com.fengmap.indoorPosition.R;
+import com.fengmap.indoorPosition.httpRequest.RequestManager;
+import com.fengmap.indoorPosition.utils.FileUtils;
 import com.fengmap.android.FMErrorMsg;
 import com.fengmap.android.analysis.navi.FMNaviAnalyser;
 import com.fengmap.android.analysis.navi.FMNaviResult;
@@ -40,32 +35,13 @@ import com.fengmap.android.map.marker.FMSegment;
 //import net.sf.json.JSONObject;
 
 
-import org.apache.http.entity.StringEntity;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-
-import static android.content.ContentValues.TAG;
 
 
 /**
@@ -255,7 +231,7 @@ public class FMMapBasic extends Activity implements OnFMMapInitListener, OnFMMap
         }
     }
 
-    public void testStart(View view){
+    public void getPosition(View view){
 
         clearImageLayer();
         final HashMap<String, String> apEntities = init(this);
@@ -289,23 +265,11 @@ public class FMMapBasic extends Activity implements OnFMMapInitListener, OnFMMap
         mStImageLayer.addMarker(mImageMarker);            //添加图片标志物
     }
 
-    public void testEnd(View view){
+    public void chooseAlgorithm(View view){
 
-
-        FMMapCoord centerCoord = new FMMapCoord(12735860, 3569545);
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.end);
-        FMImageMarker mImageMarker = new FMImageMarker(centerCoord, bitmap);
-//设置图片宽高
-        mImageMarker.setMarkerWidth(80);
-        mImageMarker.setMarkerHeight(80);
-//设置图片垂直偏离距离
-        mImageMarker.setFMImageMarkerOffsetMode(FMImageMarker.FMImageMarkerOffsetMode.FMNODE_CUSTOM_HEIGHT);
-        mImageMarker.setCustomOffsetHeight(0);
-
-        mStImageLayer.addMarker(mImageMarker);            //添加图片标志物
     }
 
-    public void testClear(View view){
+    public void clearTag(View view){
         clearImageLayer();
     }
 

@@ -1,8 +1,8 @@
-package com.fengmap.FMDemoBaseMap.widget;
+package com.fengmap.indoorPosition.widget;
 
 import android.view.View;
 
-import com.fengmap.FMDemoBaseMap.utils.TaskFilter;
+import com.fengmap.indoorPosition.utils.TaskFilter;
 
 /**
  * @Email hezutao@fengmap.com

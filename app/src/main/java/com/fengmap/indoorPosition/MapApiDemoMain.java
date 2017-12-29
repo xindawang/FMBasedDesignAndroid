@@ -1,4 +1,4 @@
-package com.fengmap.FMDemoBaseMap;
+package com.fengmap.indoorPosition;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -11,15 +11,15 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.fengmap.FMDemoBaseMap.map.FMMap2D3D;
-import com.fengmap.FMDemoBaseMap.map.FMMapBasic;
-import com.fengmap.FMDemoBaseMap.map.FMMapCoordTransform;
-import com.fengmap.FMDemoBaseMap.map.FMMapGroups;
-import com.fengmap.FMDemoBaseMap.map.FMMapInitialize;
-import com.fengmap.FMDemoBaseMap.map.FMMapLayers;
-import com.fengmap.FMDemoBaseMap.map.FMMapOperation;
-import com.fengmap.FMDemoBaseMap.map.FMMapThemeSwitch;
-import com.fengmap.FMDemoBaseMap.utils.ViewHelper;
+import com.fengmap.indoorPosition.map.FMMap2D3D;
+import com.fengmap.indoorPosition.map.FMMapBasic;
+import com.fengmap.indoorPosition.map.FMMapCoordTransform;
+import com.fengmap.indoorPosition.map.FMMapGroups;
+import com.fengmap.indoorPosition.map.FMMapInitialize;
+import com.fengmap.indoorPosition.map.FMMapLayers;
+import com.fengmap.indoorPosition.map.FMMapOperation;
+import com.fengmap.indoorPosition.map.FMMapThemeSwitch;
+import com.fengmap.indoorPosition.utils.ViewHelper;
 import com.fengmap.android.FMMapSDK;
 
 

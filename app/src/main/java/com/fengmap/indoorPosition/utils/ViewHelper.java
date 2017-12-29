@@ -1,4 +1,4 @@
-package com.fengmap.FMDemoBaseMap.utils;
+package com.fengmap.indoorPosition.utils;
 
 import android.app.Activity;
 import android.content.res.Resources;
@@ -8,7 +8,7 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 
-import com.fengmap.FMDemoBaseMap.R;
+import com.fengmap.indoorPosition.R;
 import com.fengmap.android.map.geometry.FMMapCoord;
 import com.fengmap.android.map.marker.FMImageMarker;
 

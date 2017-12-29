@@ -1,4 +1,4 @@
-package com.fengmap.FMDemoBaseMap.widget;
+package com.fengmap.indoorPosition.widget;
 
 import android.app.Activity;
 import android.content.Context;
@@ -10,7 +10,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.fengmap.FMDemoBaseMap.R;
+import com.fengmap.indoorPosition.R;
 
 
 /**
@@ -60,7 +60,7 @@ public class NavigationBar extends RelativeLayout {
         for (int i = 0; i < count; i++) {
             int index = typeArray.getIndex(i);
             switch (index) {
-                case R.styleable.NavigationBar_title:
+                case R.styleable.NavigationBar_NavigationBar_title:
                     mTitleTxt.setText(typeArray.getText(index));
                     break;
                 default:
