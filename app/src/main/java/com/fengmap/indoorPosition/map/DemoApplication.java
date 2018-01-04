@@ -1,4 +1,4 @@
-package com.fengmap.indoorPosition;
+package com.fengmap.indoorPosition.map;
 
 import android.app.Application;
 

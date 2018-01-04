@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">FengmapBaseMap</string>
+    <string name="online_position">在线定位</string>
 
     <string name="demo_title_main">Fengmap Demo 地图展示 V%1$s</string>
     <string name="demo_title_basemap">基本地图显示</string>
