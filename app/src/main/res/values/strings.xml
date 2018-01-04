@@ -33,4 +33,10 @@
     <string name="demo_title_transform">坐标转换</string>
     <string name="demo_title_main_transform">坐标转换 - FMMapCoordTransform</string>
     <string name="map_transform_tips">当前楼层(groupId): groupId=%1$d\n原始屏幕坐标(point): x=%2$.0f, y=%3$.0f\n转换后的地理坐标(mapCoord): x=%4$.0f, y=%5$.0f\n转换后的屏幕坐标(point): x=%6$.0f, y=%7$.0f</string>
+
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
 </resources>

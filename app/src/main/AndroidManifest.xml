@@ -38,7 +38,7 @@
         <!--这里输入秘钥-->
         <meta-data
             android:name="com.fengmap.mapapi.appkey"
-            android:value="9d9ee0fab35733a039da7a9e6fa1e215"/>
+            android:value="d58adc69691b7c47a75b396602fcfaae"/>
 
         <activity
             android:name="com.fengmap.indoorPosition.HomeActivity"
@@ -49,6 +49,12 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".NavActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
 
         <activity

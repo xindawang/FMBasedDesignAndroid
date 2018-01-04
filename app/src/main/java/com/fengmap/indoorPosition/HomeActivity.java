@@ -31,7 +31,7 @@ public class HomeActivity extends AppCompatActivity {
         forward_to_map.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(HomeActivity.this,FMMapBasic.class);
+                Intent intent = new Intent(HomeActivity.this,NavActivity.class);
                 startActivityForResult(intent,0);
             }
         });
