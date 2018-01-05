@@ -1,11 +1,13 @@
 package com.fengmap.indoorPosition;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
-import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,18 +15,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fengmap.indoorPosition.R;
 import com.fengmap.indoorPosition.entity.APEntity;
 import com.fengmap.indoorPosition.entity.RPEntity;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -43,7 +51,7 @@ public class WifiListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.wifi_list);
-        init(WifiListActivity.this);
+        init(this);
 
         store_RSSI_info = (Button) findViewById(R.id.store_RSSI_info);
         store_RSSI_info.setOnClickListener(new View.OnClickListener() {
@@ -97,7 +105,7 @@ public class WifiListActivity extends AppCompatActivity {
     }
 
     private void init(Context context) {
-        wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         openWifi();
         wifiManager.startScan();
         list = wifiManager.getScanResults();
