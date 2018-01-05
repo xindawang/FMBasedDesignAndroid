@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">FengmapBaseMap</string>
+    <string name="app_name">无线wifi室内定位</string>
     <string name="online_position">在线定位</string>
     <string name="data_collecting">数据采集</string>
 

@@ -44,6 +44,7 @@ public class WifiListActivity extends AppCompatActivity {
     List<ScanResult> selectedList;
 
     Button store_RSSI_info;
+    Button refresh_RSSI_info;
 
     int rpCount = 1;
 
@@ -51,14 +52,22 @@ public class WifiListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.wifi_list);
-        init(this);
+        init();
 
         store_RSSI_info = (Button) findViewById(R.id.store_RSSI_info);
         store_RSSI_info.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 buttonStoreClick();
-                init(WifiListActivity.this);
+                init();
+            }
+        });
+
+        refresh_RSSI_info = (Button) findViewById(R.id.refresh_RSSI_info);
+        refresh_RSSI_info.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                init();
             }
         });
     }
@@ -104,8 +113,8 @@ public class WifiListActivity extends AppCompatActivity {
         finish();
     }
 
-    private void init(Context context) {
-        wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+    private void init() {
+        wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         openWifi();
         wifiManager.startScan();
         list = wifiManager.getScanResults();

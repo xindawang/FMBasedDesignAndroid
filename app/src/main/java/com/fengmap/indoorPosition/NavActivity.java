@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -65,6 +66,7 @@ public class NavActivity extends AppCompatActivity
     private WifiManager wifiManager;
 
     private String positioningResult;
+    private boolean httpIsAvailable;
 
     public static final MediaType MEDIA_TYPE_MARKDOWN
             = MediaType.parse("text/x-markdown; charset=utf-8");
@@ -86,8 +88,7 @@ public class NavActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                getPosition(view);
             }
         });
 
@@ -223,8 +224,6 @@ public class NavActivity extends AppCompatActivity
     @Override
     public void onMapInitFailure(String path, int errorCode) {
         //TODO 可以提示用户地图加载失败原因，进行地图加载失败处理
-
-
         Log.e(String.valueOf(errorCode),FMErrorMsg.getErrorMsg(errorCode));
 
     }
@@ -249,6 +248,9 @@ public class NavActivity extends AppCompatActivity
 
     @Override
     public void onMapClick(float x, float y) {
+
+        if (positioningResult == null) return;
+
         final FMPickMapCoordResult mapCoordResult = mFMMap.pickMapCoord(x, y);
         mLineLayer.removeAll();
         mEndImageLayer.removeAll();
@@ -311,22 +313,32 @@ public class NavActivity extends AppCompatActivity
     public void getPosition(View view){
 
         clearImageLayer();
-        final HashMap<String, String> apEntities = init(this);
+        final HashMap<String, String> apEntities = init();
 
-        Thread httpRequest = new Thread(){
+        final Thread httpRequest = new Thread(){
             @Override
             public void run(){
                 RequestManager requestManager = RequestManager.getInstance(NavActivity.this);
                 positioningResult = requestManager.requestSyn("loc",2,apEntities);
+                if (positioningResult == null){
+                    Looper.prepare();
+                    Toast.makeText(NavActivity.this, "请检查服务器连接！", Toast.LENGTH_SHORT).show();
+                    Looper.loop();
+                    httpIsAvailable = false;
+                }else httpIsAvailable = true;
             }
         };
 
         httpRequest.start();
-        try {
-            httpRequest.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        if (httpIsAvailable){
+            try {
+                httpRequest.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }else return;
+
+        if (positioningResult == null) return;
 
         String [] locInfo = positioningResult.split(",");
         FMMapCoord centerCoord = new FMMapCoord(Double.parseDouble(locInfo[0]), Double.parseDouble(locInfo[1]));
@@ -350,8 +362,8 @@ public class NavActivity extends AppCompatActivity
         clearImageLayer();
     }
 
-    private HashMap<String, String> init(Context context) {
-        wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+    private HashMap<String, String> init() {
+        wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         openWifi();
         wifiManager.startScan();
         List<ScanResult> list = wifiManager.getScanResults();
