@@ -1,13 +1,13 @@
 package com.fengmap.indoorPosition;
 
 import android.content.Context;
-import android.content.Intent;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Environment;
+import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,24 +20,19 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fengmap.indoorPosition.R;
 import com.fengmap.indoorPosition.entity.APEntity;
 import com.fengmap.indoorPosition.entity.RPEntity;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class WifiListActivity extends AppCompatActivity {
+public class WifiListActivity extends AppCompatActivity{
 
     private WifiManager wifiManager;
     List<ScanResult> list;
@@ -182,15 +177,29 @@ public class WifiListActivity extends AppCompatActivity {
             textView.setText(scanResult.SSID);
             TextView signalStrenth = (TextView) view.findViewById(R.id.signal_strenth);
             signalStrenth.setText(String.valueOf(Math.abs(scanResult.level)));
+
+            ImageView imageView = (ImageView) view.findViewById(R.id.imageView);
+            setWifiImage(scanResult.level,imageView);
             return view;
         }
+    }
 
+    private void setWifiImage(int strength, ImageView imageView){
+        if (strength <= 0 && strength >= -40) {
+            imageView.setImageResource(R.drawable.wifi3);
+        } else if (strength < -40 && strength >= -60) {
+            imageView.setImageResource(R.drawable.wifi2);
+        } else if (strength < -60 && strength >= -80) {
+            imageView.setImageResource(R.drawable.wifi1);
+        }else {
+            imageView.setImageResource(R.drawable.wifi0);
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.wifi_menu, menu);
         return true;
     }
 

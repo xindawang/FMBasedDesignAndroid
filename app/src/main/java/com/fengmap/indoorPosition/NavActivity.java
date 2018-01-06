@@ -1,6 +1,7 @@
 package com.fengmap.indoorPosition;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.wifi.ScanResult;
@@ -9,7 +10,6 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -24,7 +24,6 @@ import android.widget.Toast;
 import com.fengmap.android.FMErrorMsg;
 import com.fengmap.android.analysis.navi.FMNaviAnalyser;
 import com.fengmap.android.analysis.navi.FMNaviResult;
-import com.fengmap.android.data.OnFMDownloadProgressListener;
 import com.fengmap.android.exception.FMObjectException;
 import com.fengmap.android.map.FMMap;
 import com.fengmap.android.map.FMMapUpgradeInfo;
@@ -39,7 +38,6 @@ import com.fengmap.android.map.marker.FMImageMarker;
 import com.fengmap.android.map.marker.FMLineMarker;
 import com.fengmap.android.map.marker.FMSegment;
 import com.fengmap.indoorPosition.httpRequest.RequestManager;
-import com.fengmap.indoorPosition.map.FMMapBasic;
 import com.fengmap.indoorPosition.utils.FileUtils;
 
 import java.io.FileNotFoundException;
@@ -51,7 +49,7 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 
 public class NavActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener,OnFMMapInitListener, OnFMMapClickListener {
+        implements NavigationView.OnNavigationItemSelectedListener, OnFMMapInitListener, OnFMMapClickListener {
 
     private FMMapView mMapView;
     private FMMap mFMMap;
@@ -76,7 +74,7 @@ public class NavActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_nav);
+        setContentView(R.layout.nav);
 
         openMapByPath();
         mFMMap.setOnFMMapClickListener(this);
@@ -120,7 +118,7 @@ public class NavActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.home, menu);
+        getMenuInflater().inflate(R.menu.map_menu, menu);
         return true;
     }
 
@@ -139,7 +137,6 @@ public class NavActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
@@ -150,7 +147,8 @@ public class NavActivity extends AppCompatActivity
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
-
+            Intent intent = new Intent(NavActivity.this,WifiListActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_manage) {
 
         } else if (id == R.id.nav_share) {
@@ -215,30 +213,14 @@ public class NavActivity extends AppCompatActivity
         }
     }
 
-    /**
-     * 地图加载失败回调事件
-     *
-     * @param path      地图所在sdcard路径
-     * @param errorCode 失败加载错误码，可以通过{@link FMErrorMsg#getErrorMsg(int)}获取加载地图失败详情
-     */
+    //地图加载失败回调事件
     @Override
     public void onMapInitFailure(String path, int errorCode) {
         //TODO 可以提示用户地图加载失败原因，进行地图加载失败处理
-        Log.e(String.valueOf(errorCode),FMErrorMsg.getErrorMsg(errorCode));
+        Log.e(String.valueOf(errorCode), FMErrorMsg.getErrorMsg(errorCode));
 
     }
 
-    /**
-     * 当{@link FMMap#openMapById(String, boolean)}设置openMapById(String, false)时地图不自动更新会
-     * 回调此事件，可以调用{@link FMMap#upgrade(FMMapUpgradeInfo, OnFMDownloadProgressListener)}进行
-     * 地图下载更新
-     *
-     * @param upgradeInfo 地图版本更新详情,地图版本号{@link FMMapUpgradeInfo#getVersion()},<br/>
-     *                    地图id{@link FMMapUpgradeInfo#getMapId()}
-     * @return 如果调用了{@link FMMap#upgrade(FMMapUpgradeInfo, OnFMDownloadProgressListener)}地图下载更新，
-     * 返回值return true,因为{@link FMMap#upgrade(FMMapUpgradeInfo, OnFMDownloadProgressListener)}
-     * 会自动下载更新地图，更新完成后会加载地图;否则return false。
-     */
     @Override
     public boolean onUpgrade(FMMapUpgradeInfo upgradeInfo) {
         //TODO 获取到最新地图更新的信息，可以进行地图的下载操作
@@ -255,20 +237,12 @@ public class NavActivity extends AppCompatActivity
         mLineLayer.removeAll();
         mEndImageLayer.removeAll();
 
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.end);
-
-        String [] locInfo = positioningResult.split(",");
+        String[] locInfo = positioningResult.split(",");
         stCoord = new FMMapCoord(Double.parseDouble(locInfo[0]), Double.parseDouble(locInfo[1]));
         endCoord = mapCoordResult.getMapCoord();
-        FMImageMarker mImageMarker = new FMImageMarker(mapCoordResult.getMapCoord(), bitmap);
-        //设置图片宽高
-        mImageMarker.setMarkerWidth(80);
-        mImageMarker.setMarkerHeight(80);
-        //设置图片垂直偏离距离
-        mImageMarker.setFMImageMarkerOffsetMode(FMImageMarker.FMImageMarkerOffsetMode.FMNODE_CUSTOM_HEIGHT);
-        mImageMarker.setCustomOffsetHeight(0.4f);
 
-        mEndImageLayer.addMarker(mImageMarker);
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.end);
+        mEndImageLayer.addMarker(setStartAndEndPic(mapCoordResult.getMapCoord(), bitmap));
 
 
         //创建线图层
@@ -310,70 +284,76 @@ public class NavActivity extends AppCompatActivity
         }
     }
 
-    public void getPosition(View view){
+    public void getPosition(View view) {
 
         clearImageLayer();
-        final HashMap<String, String> apEntities = init();
+        final HashMap<String, String> apEntities = getWifiList();
+        if (apEntities == null) return;
 
-        final Thread httpRequest = new Thread(){
+        final Thread httpRequest = new Thread() {
             @Override
-            public void run(){
+            public void run() {
                 RequestManager requestManager = RequestManager.getInstance(NavActivity.this);
-                positioningResult = requestManager.requestSyn("loc",2,apEntities);
-                if (positioningResult == null){
+                positioningResult = requestManager.requestSyn("loc", 2, apEntities);
+                if (positioningResult == null) {
                     Looper.prepare();
                     Toast.makeText(NavActivity.this, "请检查服务器连接！", Toast.LENGTH_SHORT).show();
                     Looper.loop();
                     httpIsAvailable = false;
-                }else httpIsAvailable = true;
+                } else httpIsAvailable = true;
             }
         };
 
         httpRequest.start();
-        if (httpIsAvailable){
+        if (httpIsAvailable) {
             try {
                 httpRequest.join();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }else return;
+        } else return;
 
-        if (positioningResult == null) return;
-
-        String [] locInfo = positioningResult.split(",");
+        String[] locInfo = positioningResult.split(",");
         FMMapCoord centerCoord = new FMMapCoord(Double.parseDouble(locInfo[0]), Double.parseDouble(locInfo[1]));
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.start);
+        mStImageLayer.addMarker(setStartAndEndPic(centerCoord, bitmap));            //添加图片标志物
+    }
+
+    //设置起始与终止位置图片样式
+    private FMImageMarker setStartAndEndPic(FMMapCoord centerCoord, Bitmap bitmap) {
         FMImageMarker mImageMarker = new FMImageMarker(centerCoord, bitmap);
-//设置图片宽高
+        //设置图片宽高
         mImageMarker.setMarkerWidth(80);
         mImageMarker.setMarkerHeight(80);
-//设置图片垂直偏离距离
+        //设置图片垂直偏离距离
         mImageMarker.setFMImageMarkerOffsetMode(FMImageMarker.FMImageMarkerOffsetMode.FMNODE_CUSTOM_HEIGHT);
         mImageMarker.setCustomOffsetHeight(0);
-
-        mStImageLayer.addMarker(mImageMarker);            //添加图片标志物
+        return mImageMarker;
     }
 
-    public void chooseAlgorithm(View view){
+    public void chooseAlgorithm(View view) {
 
     }
 
-    public void clearTag(View view){
+    public void clearTag(View view) {
         clearImageLayer();
     }
 
-    private HashMap<String, String> init() {
+
+    //获取wifi列表
+    private HashMap<String, String> getWifiList() {
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         openWifi();
         wifiManager.startScan();
         List<ScanResult> list = wifiManager.getScanResults();
         if (list == null) {
             Toast.makeText(this, "wifi未打开！", Toast.LENGTH_LONG).show();
+            return null;
         }
         HashMap<String, String> apEntities = new HashMap<>();
-        for (ScanResult scanResult : list){
+        for (ScanResult scanResult : list) {
             if (scanResult.SSID.contains("abc"))
-                apEntities.put(scanResult.SSID,String.valueOf(scanResult.level));
+                apEntities.put(scanResult.SSID, String.valueOf(scanResult.level));
         }
         return apEntities;
     }
