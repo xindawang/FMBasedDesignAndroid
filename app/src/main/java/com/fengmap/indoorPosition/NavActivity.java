@@ -1,5 +1,6 @@
 package com.fengmap.indoorPosition;
 
+import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -14,6 +15,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.menu.MenuView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -29,6 +31,7 @@ import com.fengmap.android.map.FMMap;
 import com.fengmap.android.map.FMMapUpgradeInfo;
 import com.fengmap.android.map.FMMapView;
 import com.fengmap.android.map.FMPickMapCoordResult;
+import com.fengmap.android.map.FMViewMode;
 import com.fengmap.android.map.event.OnFMMapClickListener;
 import com.fengmap.android.map.event.OnFMMapInitListener;
 import com.fengmap.android.map.geometry.FMMapCoord;
@@ -62,6 +65,7 @@ public class NavActivity extends AppCompatActivity
     private FMMapCoord endCoord;
 
     private WifiManager wifiManager;
+    private boolean is3d;
 
     private String positioningResult;
     private boolean httpIsAvailable;
@@ -87,6 +91,14 @@ public class NavActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 getPosition(view);
+            }
+        });
+
+        final FloatingActionButton select_2d_3d = (FloatingActionButton) findViewById(R.id.select_2d_3d);
+        select_2d_3d.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                select_2d_3d(view,select_2d_3d);
             }
         });
 
@@ -130,7 +142,9 @@ public class NavActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.select_algorithm) {
+            Intent intent = new Intent(NavActivity.this,AlgorithmActivity.class);
+            startActivityForResult(intent,0);
             return true;
         }
 
@@ -231,7 +245,12 @@ public class NavActivity extends AppCompatActivity
     @Override
     public void onMapClick(float x, float y) {
 
-        if (positioningResult == null) return;
+        if (positioningResult == null){
+//            Looper.prepare();
+            Toast.makeText(NavActivity.this, "请先进行定位！", Toast.LENGTH_SHORT).show();
+//            Looper.loop();
+            return;
+        }
 
         final FMPickMapCoordResult mapCoordResult = mFMMap.pickMapCoord(x, y);
         mLineLayer.removeAll();
@@ -317,6 +336,18 @@ public class NavActivity extends AppCompatActivity
         FMMapCoord centerCoord = new FMMapCoord(Double.parseDouble(locInfo[0]), Double.parseDouble(locInfo[1]));
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.start);
         mStImageLayer.addMarker(setStartAndEndPic(centerCoord, bitmap));            //添加图片标志物
+    }
+
+    private void select_2d_3d(View view,FloatingActionButton select_2d_3d) {
+        if (is3d) {
+            mFMMap.setFMViewMode(FMViewMode.FMVIEW_MODE_2D); //设置地图2D显示模式
+            select_2d_3d.setImageResource(R.drawable.two_dim);
+            is3d = false;
+        } else {
+            mFMMap.setFMViewMode(FMViewMode.FMVIEW_MODE_3D); //设置地图3D显示模式
+            select_2d_3d.setImageResource(R.drawable.three_dim);
+            is3d = true;
+        }
     }
 
     //设置起始与终止位置图片样式

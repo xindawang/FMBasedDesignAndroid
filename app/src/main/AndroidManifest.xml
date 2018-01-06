@@ -64,6 +64,11 @@
             android:label="@string/data_collecting"
             android:theme="@style/AppTheme"></activity>
 
+        <activity
+            android:name=".AlgorithmActivity"
+            android:label="@string/select_algorithm"
+            android:theme="@style/AppTheme"></activity>
+
     </application>
 
 </manifest>
