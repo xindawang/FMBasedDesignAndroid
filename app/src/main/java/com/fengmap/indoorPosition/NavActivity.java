@@ -40,6 +40,7 @@ import com.fengmap.android.map.layer.FMLineLayer;
 import com.fengmap.android.map.marker.FMImageMarker;
 import com.fengmap.android.map.marker.FMLineMarker;
 import com.fengmap.android.map.marker.FMSegment;
+import com.fengmap.indoorPosition.entity.AlgoEntity;
 import com.fengmap.indoorPosition.httpRequest.RequestManager;
 import com.fengmap.indoorPosition.utils.FileUtils;
 
@@ -69,6 +70,7 @@ public class NavActivity extends AppCompatActivity
 
     private String positioningResult;
     private boolean httpIsAvailable;
+    private int algorithm_code;
 
     public static final MediaType MEDIA_TYPE_MARKDOWN
             = MediaType.parse("text/x-markdown; charset=utf-8");
@@ -144,6 +146,8 @@ public class NavActivity extends AppCompatActivity
         //noinspection SimplifiableIfStatement
         if (id == R.id.select_algorithm) {
             Intent intent = new Intent(NavActivity.this,AlgorithmActivity.class);
+            // 把bundle放入intent里
+            intent.putExtra("algorithm_code", algorithm_code);
             startActivityForResult(intent,0);
             return true;
         }
@@ -309,6 +313,9 @@ public class NavActivity extends AppCompatActivity
         final HashMap<String, String> apEntities = getWifiList();
         if (apEntities == null) return;
 
+        AlgoEntity algoEntity = new AlgoEntity(algorithm_code);
+        apEntities.put("algorithm",algoEntity.getName());
+
         final Thread httpRequest = new Thread() {
             @Override
             public void run() {
@@ -332,6 +339,7 @@ public class NavActivity extends AppCompatActivity
             }
         } else return;
 
+        if (positioningResult.contains("null")) return;
         String[] locInfo = positioningResult.split(",");
         FMMapCoord centerCoord = new FMMapCoord(Double.parseDouble(locInfo[0]), Double.parseDouble(locInfo[1]));
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.start);
@@ -362,8 +370,17 @@ public class NavActivity extends AppCompatActivity
         return mImageMarker;
     }
 
-    public void chooseAlgorithm(View view) {
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.i("Main", "requestCode:"+requestCode+"resultCode:"+resultCode);
+        if(resultCode==1){
+            if(requestCode==0){
+                Integer code=data.getIntExtra("algorithm_code",0);
+                algorithm_code = code;
+            }
+        }
     }
 
     public void clearTag(View view) {

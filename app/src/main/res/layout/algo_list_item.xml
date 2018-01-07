@@ -3,13 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="50dp" >
 
-    <!--<ImageView-->
-        <!--android:id="@+id/algorithm_imageView"-->
-        <!--android:layout_width="50dp"-->
-        <!--android:layout_height="50dp"-->
-        <!--android:layout_alignParentLeft="true"-->
-        <!--android:layout_alignParentTop="true" />-->
-
     <TextView
         android:id="@+id/algorithm_name"
         android:layout_width="wrap_content"
@@ -20,13 +13,15 @@
         android:layout_toRightOf="@+id/imageView"
         android:text="TextView" />
 
-    <!--<TextView-->
-        <!--android:id="@+id/algorithm_info"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_alignBaseline="@+id/textView"-->
-        <!--android:layout_alignBottom="@+id/textView"-->
-        <!--android:layout_alignParentRight="true"-->
-        <!--android:text="TextView" />-->
+
+    <ImageView
+        android:id="@+id/algorithm_imageView"
+        android:layout_width="20dp"
+        android:layout_height="50dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="50dp"
+        android:layout_alignParentTop="true"
+        android:src="@drawable/select_no"/>
+
 
 </RelativeLayout>

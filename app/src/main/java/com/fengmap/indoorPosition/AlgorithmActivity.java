@@ -1,6 +1,7 @@
 package com.fengmap.indoorPosition;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -38,12 +39,53 @@ import java.util.Set;
 public class AlgorithmActivity extends AppCompatActivity{
 
     List<String> list;
+    private int algorithm_code;
+    ListView listView;
+    Button cancel_algorithm;
+    Button confirm_algorithm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.algo_list);
-        init();
+
+        Intent intent = getIntent();
+        //从intent取出bundle
+        Bundle bundle=intent.getBundleExtra("data");
+        //获取数据
+        Integer code=intent.getIntExtra("algorithm_code",0);
+        if (code != null) algorithm_code = code;
+
+        listView = (ListView) findViewById(R.id.algorithm_listView);
+        cancel_algorithm = (Button) findViewById(R.id.cancel_algorithm);
+        cancel_algorithm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
+
+        confirm_algorithm = (Button) findViewById(R.id.confirm_algorithm);
+        confirm_algorithm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent();
+                intent.putExtra("algorithm_code", algorithm_code);
+                setResult(1, intent);
+                finish();
+            }
+        });
+
+        initListView();
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                if (i == algorithm_code) return;
+                algorithm_code = i;
+                initListView();
+            }
+        });
+
     }
 
     @Override
@@ -51,8 +93,7 @@ public class AlgorithmActivity extends AppCompatActivity{
         finish();
     }
 
-    private void init() {
-        ListView listView = (ListView) findViewById(R.id.algorithm_listView);
+    private void initListView() {
         listView.setAdapter(new AlgorithmActivity.MyAdapter(this, list));
     }
 
@@ -96,6 +137,11 @@ public class AlgorithmActivity extends AppCompatActivity{
 
             TextView textView = (TextView) view.findViewById(R.id.algorithm_name);
             textView.setText(list.get(position));
+
+            if (position == algorithm_code){
+                ImageView algorithm_imageView = (ImageView) view.findViewById(R.id.algorithm_imageView);
+                algorithm_imageView.setImageResource(R.drawable.select_yes);
+            }
 
             return view;
         }
