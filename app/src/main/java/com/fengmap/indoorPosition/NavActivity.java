@@ -1,6 +1,5 @@
 package com.fengmap.indoorPosition;
 
-import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -15,7 +14,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.view.menu.MenuView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -40,6 +38,7 @@ import com.fengmap.android.map.layer.FMLineLayer;
 import com.fengmap.android.map.marker.FMImageMarker;
 import com.fengmap.android.map.marker.FMLineMarker;
 import com.fengmap.android.map.marker.FMSegment;
+import com.fengmap.indoorPosition.PersonalInfo.RoundImage;
 import com.fengmap.indoorPosition.entity.AlgoEntity;
 import com.fengmap.indoorPosition.httpRequest.RequestManager;
 import com.fengmap.indoorPosition.utils.FileUtils;
@@ -66,7 +65,7 @@ public class NavActivity extends AppCompatActivity
     private FMMapCoord endCoord;
 
     private WifiManager wifiManager;
-    private boolean is3d;
+    private boolean show2dMap;
 
     private String positioningResult;
     private boolean httpIsAvailable;
@@ -161,7 +160,8 @@ public class NavActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
-            // Handle the camera action
+            Intent intent = new Intent(NavActivity.this,PersonalActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
@@ -347,14 +347,14 @@ public class NavActivity extends AppCompatActivity
     }
 
     private void select_2d_3d(View view,FloatingActionButton select_2d_3d) {
-        if (is3d) {
+        if (show2dMap == false) {
             mFMMap.setFMViewMode(FMViewMode.FMVIEW_MODE_2D); //设置地图2D显示模式
             select_2d_3d.setImageResource(R.drawable.two_dim);
-            is3d = false;
+            show2dMap = true;
         } else {
             mFMMap.setFMViewMode(FMViewMode.FMVIEW_MODE_3D); //设置地图3D显示模式
             select_2d_3d.setImageResource(R.drawable.three_dim);
-            is3d = true;
+            show2dMap = false;
         }
     }
 

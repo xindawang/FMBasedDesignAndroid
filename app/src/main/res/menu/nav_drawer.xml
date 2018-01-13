@@ -15,11 +15,11 @@
         <item
             android:id="@+id/nav_gallery"
             android:icon="@drawable/ic_menu_gallery"
-            android:title="图片管理" />
+            android:title="我的文件" />
         <item
             android:id="@+id/nav_manage"
             android:icon="@drawable/ic_menu_manage"
-            android:title="用户设置" />
+            android:title="账号设置" />
     </group>
 
     <item android:title="网络通信">

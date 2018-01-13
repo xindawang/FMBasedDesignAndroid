@@ -62,12 +62,22 @@
         <activity
             android:name=".WifiListActivity"
             android:label="@string/data_collecting"
-            android:theme="@style/AppTheme"></activity>
+            android:theme="@style/AppTheme" />
 
         <activity
             android:name=".AlgorithmActivity"
             android:label="@string/select_algorithm"
-            android:theme="@style/AppTheme"></activity>
+            android:theme="@style/AppTheme"/>
+
+        <activity
+            android:name=".PersonalInfo.RoundImage"
+            android:label="@string/select_algorithm"
+            android:theme="@style/AppTheme" />
+
+        <activity
+            android:name=".PersonalActivity"
+            android:label="@string/select_algorithm"
+            android:theme="@style/AppTheme" />
 
     </application>
 
