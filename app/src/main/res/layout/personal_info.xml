@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="com.fengmap.indoorPosition.AlgorithmActivity">
+    tools:context="com.fengmap.indoorPosition.PersonalActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -50,15 +50,15 @@
 
 
             <EditText
-                android:layout_width="60dp"
+                android:layout_width="wrap_content"
                 android:layout_height="60dp"
                 android:layout_centerVertical="true"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:layout_alignParentRight="true"
                 android:layout_marginRight="50dp"
                 android:gravity="center_vertical"
                 android:layout_alignParentTop="true"
-                android:hint="name" />
+                android:hint="请输入姓名" />
 
 
         </RelativeLayout>
@@ -81,6 +81,7 @@
 
 
             <TextView
+                android:id="@+id/personal_device_name"
                 android:layout_width="wrap_content"
                 android:layout_height="60dp"
                 android:layout_alignParentRight="true"
@@ -108,13 +109,14 @@
 
 
             <TextView
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:id="@+id/personal_graduate_time"
+                android:layout_width="wrap_content"
+                android:layout_height="60dp"
                 android:layout_alignParentRight="true"
                 android:layout_marginRight="50dp"
                 android:gravity="center_vertical"
                 android:layout_alignParentTop="true"
-                android:text="name" />
+                android:text="请选择日期" />
 
 
         </RelativeLayout>
@@ -132,7 +134,7 @@
             android:text="保存" />
 
         <Button
-            android:id="@+id/cancel_algorithm"
+            android:id="@+id/personal_info_cancel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"

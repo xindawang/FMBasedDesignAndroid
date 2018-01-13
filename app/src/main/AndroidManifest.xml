@@ -70,13 +70,13 @@
             android:theme="@style/AppTheme"/>
 
         <activity
-            android:name=".PersonalInfo.RoundImage"
-            android:label="@string/select_algorithm"
+            android:name=".PersonalActivity"
+            android:label="@string/personal_info"
             android:theme="@style/AppTheme" />
 
         <activity
-            android:name=".PersonalActivity"
-            android:label="@string/select_algorithm"
+            android:name=".UserManageActivity"
+            android:label="@string/user_manage"
             android:theme="@style/AppTheme" />
 
     </application>

@@ -2,17 +2,28 @@ package com.fengmap.indoorPosition;
 /**
  * Created by ACER on 2018/1/13.
  */
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.fengmap.indoorPosition.utils.RoundImageView;
 
+import org.feezu.liuli.timeselector.TimeSelector;
+
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
 import java.text.SimpleDateFormat;
 
 /**
@@ -21,6 +32,9 @@ import java.text.SimpleDateFormat;
 
 public class PersonalActivity extends AppCompatActivity {
     private RoundImageView personal_portrait;
+    private TextView personal_graduate_time;
+    private Button personal_info_cancel;
+    private TextView personal_device_name;
     private static final int PHOTO_REQUEST_GALLERY = 2;// 从相册中选择
     private static final int PHOTO_REQUEST_CUT = 3;// 结果
     private File tempFile;
@@ -42,6 +56,34 @@ public class PersonalActivity extends AppCompatActivity {
                 intent.setType("image/*");
                 // 开启一个带有返回值的Activity，请求码为PHOTO_REQUEST_GALLERY
                 startActivityForResult(intent, PHOTO_REQUEST_GALLERY);
+            }
+        });
+
+        //获取设备mac
+        personal_device_name = (TextView) findViewById(R.id.personal_device_name);
+        personal_device_name.setText(getMac());
+
+        //设置时间控件
+        final TimeSelector timeSelector = new TimeSelector(this, new TimeSelector.ResultHandler() {
+            @Override
+            public void handle(String time) {
+                personal_graduate_time.setText(time);
+            }
+        },"2018-1-1 00:00", "2030-1-1 00:00");
+
+        personal_graduate_time = (TextView) findViewById(R.id.personal_graduate_time);
+        personal_graduate_time.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                timeSelector.show();
+            }
+        });
+
+        personal_info_cancel = (Button) findViewById(R.id.personal_info_cancel);
+        personal_info_cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
             }
         });
     }
@@ -118,6 +160,29 @@ public class PersonalActivity extends AppCompatActivity {
         }
         super.onActivityResult(requestCode, resultCode, data);
 
+    }
+
+    public static String getMac() {
+        String macSerial = null;
+        String str = "";
+
+        try {
+            Process pp = Runtime.getRuntime().exec("cat /sys/class/net/wlan0/address ");
+            InputStreamReader ir = new InputStreamReader(pp.getInputStream());
+            LineNumberReader input = new LineNumberReader(ir);
+
+            for (; null != str; ) {
+                str = input.readLine();
+                if (str != null) {
+                    macSerial = str.trim();// 去空格
+                    break;
+                }
+            }
+        } catch (IOException ex) {
+            // 赋予默认值
+            ex.printStackTrace();
+        }
+        return macSerial;
     }
 }
 

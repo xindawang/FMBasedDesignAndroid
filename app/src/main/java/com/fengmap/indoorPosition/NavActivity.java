@@ -38,7 +38,6 @@ import com.fengmap.android.map.layer.FMLineLayer;
 import com.fengmap.android.map.marker.FMImageMarker;
 import com.fengmap.android.map.marker.FMLineMarker;
 import com.fengmap.android.map.marker.FMSegment;
-import com.fengmap.indoorPosition.PersonalInfo.RoundImage;
 import com.fengmap.indoorPosition.entity.AlgoEntity;
 import com.fengmap.indoorPosition.httpRequest.RequestManager;
 import com.fengmap.indoorPosition.utils.FileUtils;
@@ -168,7 +167,8 @@ public class NavActivity extends AppCompatActivity
             Intent intent = new Intent(NavActivity.this,WifiListActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_manage) {
-
+            Intent intent = new Intent(NavActivity.this,UserManageActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_share) {
 
         } else if (id == R.id.nav_send) {
