@@ -17,7 +17,7 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.home_page);
+        setContentView(R.layout.activity_home_page);
 
         forward_to_wifi_list = (Button) findViewById(R.id.forward_to_wifi_list) ;
         forward_to_wifi_list.setOnClickListener(new View.OnClickListener() {

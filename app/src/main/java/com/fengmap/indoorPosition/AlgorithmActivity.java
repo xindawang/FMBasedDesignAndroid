@@ -2,10 +2,7 @@ package com.fengmap.indoorPosition;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.wifi.ScanResult;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -18,19 +15,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.fengmap.indoorPosition.entity.APEntity;
-import com.fengmap.indoorPosition.entity.RPEntity;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by ACER on 2018/1/6.
@@ -47,7 +34,7 @@ public class AlgorithmActivity extends AppCompatActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.algo_list);
+        setContentView(R.layout.activity_algo_list);
 
         Intent intent = getIntent();
         //从intent取出bundle
@@ -108,6 +95,7 @@ public class AlgorithmActivity extends AppCompatActivity{
             list = new ArrayList<>();
             list.add("k近邻");
             list.add("贝叶斯");
+            list.add("卷积神经网络");
             this.list = list;
         }
 

@@ -2,19 +2,15 @@ package com.fengmap.indoorPosition;
 /**
  * Created by ACER on 2018/1/13.
  */
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.fengmap.indoorPosition.utils.RoundImageView;
 
@@ -42,7 +38,7 @@ public class PersonalActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.personal_info);
+        setContentView(R.layout.activity_personal_info);
 
         personal_portrait = (RoundImageView) findViewById(R.id.personal_portrait);
         personal_portrait.setOnClickListener(new View.OnClickListener() {

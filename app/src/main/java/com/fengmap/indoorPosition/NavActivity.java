@@ -78,7 +78,7 @@ public class NavActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.nav);
+        setContentView(R.layout.activity_nav);
 
         openMapByPath();
         mFMMap.setOnFMMapClickListener(this);
@@ -162,7 +162,8 @@ public class NavActivity extends AppCompatActivity
             Intent intent = new Intent(NavActivity.this,PersonalActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_gallery) {
-
+            Intent intent = new Intent(NavActivity.this,VersionInfoActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_slideshow) {
             Intent intent = new Intent(NavActivity.this,WifiListActivity.class);
             startActivity(intent);

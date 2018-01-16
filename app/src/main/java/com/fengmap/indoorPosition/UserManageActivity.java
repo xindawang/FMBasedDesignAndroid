@@ -17,7 +17,8 @@ public class UserManageActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.user_manage);
+        setContentView(R.layout.activity_user_manage
+        );
 
         switch_account = (Button) findViewById(R.id.switch_account);
         switch_account.setOnClickListener(new View.OnClickListener() {

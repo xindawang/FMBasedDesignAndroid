@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fengmap.indoorPosition.R;
+import com.fengmap.indoorPosition.httpRequest.HttpUpload;
 
 import java.io.File;
 import java.util.List;
@@ -81,11 +82,14 @@ public class UploadInfoAdapter extends SimpleAdapter {
             }
         });
 
+        //点击上传文件时发送至服务器端
         upload_info_send.setTag(position);
         upload_info_send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                log.e("a","ss");
+                Activity activity = (Activity) context;
+                HttpUpload httpUpload = new HttpUpload();
+                httpUpload.uploadFile(activity,"/",fullName);
             }
         });
         return view;

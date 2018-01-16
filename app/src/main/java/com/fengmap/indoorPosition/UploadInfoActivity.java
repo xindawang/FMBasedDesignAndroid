@@ -27,7 +27,7 @@ public class UploadInfoActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.upload_info_list);
+        setContentView(R.layout.activity_upload_info_list);
 
         upload_listView = (ListView) findViewById(R.id.upload_listView);
 
