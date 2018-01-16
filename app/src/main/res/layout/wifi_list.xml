@@ -7,6 +7,14 @@
     android:fitsSystemWindows="true"
     tools:context="com.fengmap.indoorPosition.WifiListActivity">
 
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/refresh_RSSI_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical|end"
+        android:layout_margin="@dimen/fab_margin"
+        android:src="@android:drawable/ic_popup_sync"/>
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -20,7 +28,7 @@
             android:layout_alignParentTop="true"></ListView>
 
         <Button
-            android:id="@+id/refresh_RSSI_info"
+            android:id="@+id/end_RSSI_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
@@ -30,7 +38,7 @@
             android:layout_marginStart="20dp"
             android:layout_marginEnd="200dp"
             android:layout_marginRight="200dp"
-            android:text="刷新" />
+            android:text="结束" />
 
         <Button
             android:id="@+id/store_RSSI_info"

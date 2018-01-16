@@ -13,13 +13,13 @@
             android:icon="@drawable/ic_menu_camera"
             android:title="个人信息" />
         <item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="我的文件" />
-        <item
             android:id="@+id/nav_manage"
             android:icon="@drawable/ic_menu_manage"
             android:title="账号设置" />
+        <item
+           android:id="@+id/nav_gallery"
+           android:icon="@drawable/ic_menu_gallery"
+           android:title="版本信息" />
     </group>
 
     <item android:title="网络通信">

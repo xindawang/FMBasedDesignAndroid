@@ -5,6 +5,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -26,20 +27,26 @@ import com.fengmap.indoorPosition.entity.RPEntity;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class WifiListActivity extends AppCompatActivity{
+public class WifiListActivity extends AppCompatActivity {
 
     private WifiManager wifiManager;
-    List<ScanResult> list;
-    List<ScanResult> selectedList;
+    private List<ScanResult> list;
+    private List<ScanResult> selectedList;
 
-    Button store_RSSI_info;
-    Button refresh_RSSI_info;
+    private Button store_RSSI_info;
+    private Button end_RSSI_info;
+    private FloatingActionButton refresh_RSSI_info;
+
+    private String basicPath = "fengmap/RSSIRecord/";
+
 
     int rpCount = 1;
 
@@ -58,16 +65,24 @@ public class WifiListActivity extends AppCompatActivity{
             }
         });
 
-        refresh_RSSI_info = (Button) findViewById(R.id.refresh_RSSI_info);
-        refresh_RSSI_info.setOnClickListener(new View.OnClickListener() {
+        end_RSSI_info = (Button) findViewById(R.id.end_RSSI_info);
+        end_RSSI_info.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                renameFile();
+            }
+        });
+
+        refresh_RSSI_info = (FloatingActionButton) findViewById(R.id.refresh_RSSI_info);
+        refresh_RSSI_info.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
                 init();
             }
         });
     }
 
-    public void buttonStoreClick(){
+    public void buttonStoreClick() {
         RPEntity rpEntity = new RPEntity();
         Set<APEntity> apEntities = new HashSet<>();
         for (ScanResult scanResult : selectedList) {
@@ -81,29 +96,52 @@ public class WifiListActivity extends AppCompatActivity{
         printResult(rpEntity);
     }
 
-    public void printResult(RPEntity rpEntity){
+    public void printResult(RPEntity rpEntity) {
         try {
+            File dir = new File(Environment.getExternalStorageDirectory(),
+                    "fengmap/RSSIRecord");
+            if (!dir.exists()) {
+                //通过file的mkdirs()方法创建<span style="color:#FF0000;">目录中包含却不存在</span>的文件夹
+                dir.mkdir();
+            }
+
             File file = new File(Environment.getExternalStorageDirectory(),
-                    "data.txt");
+                    basicPath +"tmp"+".txt");
+
             //第二个参数意义是说是否以append方式添加内容
             BufferedWriter bw = new BufferedWriter(new FileWriter(file, true));
 
             Date date = null;
             bw.write("\r\n");
             for (APEntity apEntity : rpEntity.getApEntities()) {
-                bw.write(apEntity.getApName() + " " +apEntity.getApStrength()+";");
+                bw.write(apEntity.getApName() + " " + apEntity.getApStrength() + ";");
                 date = apEntity.getTimestamp();
             }
-            bw.write("\r\n" + rpCount++ +"\t"+ date+ "\r\n");
+            bw.write("\r\n" + rpCount++ + "\t" + date + "\r\n");
             bw.flush();
             Toast.makeText(getApplicationContext(), "保存成功！",
                     Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
+            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    @Override
+    //点击结束按钮时，重命名临时文件
+    private void renameFile(){
+        SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss");
+        String recordDate = sDateFormat.format(new java.util.Date());
+        File file = new File(Environment.getExternalStorageDirectory(),
+                basicPath +"tmp"+".txt");
+        if(file.renameTo(new File(Environment.getExternalStorageDirectory(),basicPath + recordDate + ".txt"))){
+            Toast.makeText(getApplicationContext(), "记录完毕！",Toast.LENGTH_SHORT).show();
+        }else{
+            Toast.makeText(getApplicationContext(), "记录失败，缺少采集文件！",Toast.LENGTH_SHORT).show();
+        }
+    }
+
+        @Override
     public void onBackPressed() {
         finish();
     }
@@ -179,19 +217,20 @@ public class WifiListActivity extends AppCompatActivity{
             signalStrenth.setText(String.valueOf(Math.abs(scanResult.level)));
 
             ImageView imageView = (ImageView) view.findViewById(R.id.imageView);
-            setWifiImage(scanResult.level,imageView);
+            setWifiImage(scanResult.level, imageView);
             return view;
         }
     }
 
-    private void setWifiImage(int strength, ImageView imageView){
+    //根据wifi强度选择相关图片
+    private void setWifiImage(int strength, ImageView imageView) {
         if (strength <= 0 && strength >= -40) {
             imageView.setImageResource(R.drawable.wifi3);
         } else if (strength < -40 && strength >= -60) {
             imageView.setImageResource(R.drawable.wifi2);
         } else if (strength < -60 && strength >= -80) {
             imageView.setImageResource(R.drawable.wifi1);
-        }else {
+        } else {
             imageView.setImageResource(R.drawable.wifi0);
         }
     }

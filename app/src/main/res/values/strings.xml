@@ -5,6 +5,7 @@
     <string name="select_algorithm">算法选择</string>
     <string name="personal_info">个人信息</string>
     <string name="user_manage">用户设置</string>
+    <string name="upload_info">上传信息</string>
 
     <string name="demo_title_main">Fengmap Demo 地图展示 V%1$s</string>
     <string name="demo_title_basemap">基本地图显示</string>

@@ -79,6 +79,11 @@
             android:label="@string/user_manage"
             android:theme="@style/AppTheme" />
 
+        <activity
+            android:name=".UploadInfoActivity"
+            android:label="@string/upload_info"
+            android:theme="@style/AppTheme" />
+
     </application>
 
 </manifest>
