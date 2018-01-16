@@ -6,37 +6,49 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
 
 import com.fengmap.android.FMMapSDK;
+import com.fengmap.indoorPosition.entity.UserEntity;
+import com.fengmap.indoorPosition.utils.EditTextClearTools;
+import com.fengmap.indoorPosition.utils.UserInfo;
 
 public class HomeActivity extends AppCompatActivity {
 
-    Button forward_to_wifi_list;
-    Button forward_to_map;
+    private Button btn_login;
+    private EditText userName;
+    private EditText password;
+    private ImageView unameClear;
+    private ImageView pwdClear;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
+        init();
 
-        forward_to_wifi_list = (Button) findViewById(R.id.forward_to_wifi_list) ;
-        forward_to_wifi_list.setOnClickListener(new View.OnClickListener() {
+        btn_login = (Button) findViewById(R.id.btn_login);
+        btn_login.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(HomeActivity.this,WifiListActivity.class);
-                startActivityForResult(intent,0);
-            }
-        });
-
-        forward_to_map = (Button) findViewById(R.id.forward_to_map) ;
-        forward_to_map.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+            public void onClick(View view) {
+                UserInfo.getUserEntity().setUsername(userName.getText().toString());
                 Intent intent = new Intent(HomeActivity.this,NavActivity.class);
-                startActivityForResult(intent,0);
+                startActivity(intent);
             }
         });
     }
+
+    private void init(){
+        userName = (EditText) findViewById(R.id.et_userName);
+        password = (EditText) findViewById(R.id.et_password);
+        unameClear = (ImageView) findViewById(R.id.iv_unameClear);
+        pwdClear = (ImageView) findViewById(R.id.iv_pwdClear);
+
+        EditTextClearTools.addClearListener(userName,unameClear);
+        EditTextClearTools.addClearListener(password,pwdClear);
+    }
+
 
     /**
      * @Email hezutao@fengmap.com

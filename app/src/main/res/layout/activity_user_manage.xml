@@ -20,6 +20,7 @@
             android:layout_alignParentTop="true">
 
             <TextView
+                android:id="@+id/user_manage_username"
                 android:text="username"
                 android:layout_centerHorizontal="true"
                 android:layout_above="@id/personal_portrait"

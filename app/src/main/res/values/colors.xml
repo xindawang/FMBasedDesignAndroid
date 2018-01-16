@@ -14,4 +14,7 @@
     <color name="colorPrimary">#5fcf49</color>
     <color name="colorPrimaryDark">#39ba4d</color>
     <color name="colorAccent">#ffffff</color>
+    <color name="colorLogin">#0980C3</color>
+    <color name="colorLoginButton">#5fcf49</color>
+    <color name="colorCursor">#cccccc</color>
 </resources>
