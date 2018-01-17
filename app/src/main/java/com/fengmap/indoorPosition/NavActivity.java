@@ -171,7 +171,8 @@ public class NavActivity extends AppCompatActivity
             Intent intent = new Intent(NavActivity.this,UserManageActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_share) {
-
+            Intent intent = new Intent(NavActivity.this,DowloadFileActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_send) {
             Intent intent = new Intent(NavActivity.this,UploadInfoActivity.class);
             startActivity(intent);

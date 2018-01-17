@@ -84,6 +84,11 @@
             android:theme="@style/AppTheme" />
 
         <activity
+            android:name=".DowloadFileActivity"
+            android:label="@string/download_file"
+            android:theme="@style/AppTheme" />
+
+        <activity
             android:name=".VersionInfoActivity"
             android:label="@string/version_info"
             android:theme="@style/AppTheme" />

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="50dp" >
+
+    <TextView
+        android:id="@+id/download_file_name"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_marginLeft="10dp"
+        android:gravity="center_vertical"
+        android:layout_alignBottom="@+id/imageView"
+        android:layout_toRightOf="@+id/imageView"
+        android:text="TextView" />
+
+    <ImageView
+        android:id="@+id/download_file_view"
+        android:layout_width="20dp"
+        android:layout_height="50dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="120dp"
+        android:layout_alignParentTop="true"
+        android:src="@android:drawable/ic_menu_view"/>
+
+    <ImageView
+        android:id="@+id/download_file_delete"
+        android:layout_width="20dp"
+        android:layout_height="50dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="65dp"
+        android:layout_alignParentTop="true"
+        android:src="@android:drawable/ic_menu_delete"/>
+
+    <ImageView
+        android:id="@+id/download_file_send"
+        android:layout_width="20dp"
+        android:layout_height="50dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="10dp"
+        android:layout_alignParentTop="true"
+        android:src="@android:drawable/ic_menu_send"/>
+
+</RelativeLayout>

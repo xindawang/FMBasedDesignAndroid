@@ -22,12 +22,12 @@
            android:title="版本信息" />
     </group>
 
-    <item android:title="网络通信">
+    <item android:title="资源管理">
         <menu>
             <item
                 android:id="@+id/nav_share"
                 android:icon="@drawable/ic_menu_share"
-                android:title="下载地图" />
+                android:title="文件下载" />
             <item
                 android:id="@+id/nav_send"
                 android:icon="@drawable/ic_menu_send"
