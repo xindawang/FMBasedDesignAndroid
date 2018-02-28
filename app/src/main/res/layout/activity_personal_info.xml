@@ -19,7 +19,7 @@
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true">
 
-            <com.fengmap.indoorPosition.widget.NavigationBar.RoundImageView
+            <com.fengmap.indoorPosition.utils.RoundImageView
                 android:id="@+id/personal_portrait"
                 android:layout_width="128dp"
                 android:layout_height="128dp"

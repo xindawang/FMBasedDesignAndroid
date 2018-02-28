@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.fengmap.indoorPosition.utils.RoundImageView;
 import com.fengmap.indoorPosition.widget.NavigationBar;
 
 import org.feezu.liuli.timeselector.TimeSelector;
@@ -27,7 +28,7 @@ import java.text.SimpleDateFormat;
  */
 
 public class PersonalActivity extends AppCompatActivity {
-    private NavigationBar.RoundImageView personal_portrait;
+    private RoundImageView personal_portrait;
     private TextView personal_graduate_time;
     private Button personal_info_cancel;
     private TextView personal_device_name;
@@ -40,7 +41,7 @@ public class PersonalActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_personal_info);
 
-        personal_portrait = (NavigationBar.RoundImageView) findViewById(R.id.personal_portrait);
+        personal_portrait = (RoundImageView) findViewById(R.id.personal_portrait);
         personal_portrait.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

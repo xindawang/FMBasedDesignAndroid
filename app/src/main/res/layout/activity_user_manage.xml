@@ -28,7 +28,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
-            <ImageView
+            <com.fengmap.indoorPosition.utils.RoundImageView
                 android:id="@+id/personal_portrait"
                 android:layout_width="128dp"
                 android:layout_height="128dp"
