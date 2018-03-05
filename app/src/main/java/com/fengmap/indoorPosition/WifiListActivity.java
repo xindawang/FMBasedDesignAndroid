@@ -1,9 +1,12 @@
 package com.fengmap.indoorPosition;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Environment;
+import android.os.Looper;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,8 +22,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fengmap.android.map.geometry.FMMapCoord;
 import com.fengmap.indoorPosition.entity.APEntity;
+import com.fengmap.indoorPosition.entity.AlgoEntity;
 import com.fengmap.indoorPosition.entity.RPEntity;
+import com.fengmap.indoorPosition.httpRequest.RequestManager;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -29,6 +35,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -41,10 +48,14 @@ public class WifiListActivity extends AppCompatActivity {
 
     private Button store_RSSI_info;
     private Button end_RSSI_info;
+    private Button send_RSSI_info;
     private FloatingActionButton refresh_RSSI_info;
 
     private String basicPath = "fengmap/RSSIRecord/";
 
+    private String positioningResult;
+    private boolean httpIsAvailable;
+    private int algorithm_code;
 
     int rpCount = 1;
 
@@ -71,6 +82,14 @@ public class WifiListActivity extends AppCompatActivity {
             }
         });
 
+        send_RSSI_info = (Button) findViewById(R.id.send_RSSI_info);
+        send_RSSI_info.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendInfo();
+            }
+        });
+
         refresh_RSSI_info = (FloatingActionButton) findViewById(R.id.refresh_RSSI_info);
         refresh_RSSI_info.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -78,6 +97,49 @@ public class WifiListActivity extends AppCompatActivity {
                 init();
             }
         });
+    }
+
+    private void sendInfo() {
+
+//        final HashMap<String, String> apEntities = getWifiList();
+        final HashMap<String, String> apEntities = new HashMap<>();
+        apEntities.put("ap1","-56");
+        apEntities.put("ap2","-50");
+        apEntities.put("ap3","-45");
+        apEntities.put("ap4","-35");
+        apEntities.put("ap5","-41");
+        if (apEntities == null) return;
+
+        AlgoEntity algoEntity = new AlgoEntity(algorithm_code);
+        apEntities.put("algorithm",algoEntity.getName());
+
+        final Thread httpRequest = new Thread() {
+            @Override
+            public void run() {
+                RequestManager requestManager = RequestManager.getInstance(WifiListActivity.this);
+                positioningResult = requestManager.requestSyn("loc", 2, apEntities);
+                if (positioningResult == null) {
+                    Looper.prepare();
+                    Toast.makeText(WifiListActivity.this, "请检查服务器连接！", Toast.LENGTH_SHORT).show();
+                    Looper.loop();
+                    httpIsAvailable = false;
+                } else httpIsAvailable = true;
+            }
+        };
+
+        httpRequest.start();
+        if (httpIsAvailable) {
+            try {
+                httpRequest.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } else return;
+
+        if (positioningResult.contains("null")) return;
+
+        Toast.makeText(WifiListActivity.this, "上传成功！", Toast.LENGTH_SHORT).show();
+
     }
 
     public void buttonStoreClick() {
@@ -168,6 +230,30 @@ public class WifiListActivity extends AppCompatActivity {
 
     }
 
+    //获取wifi列表
+    private HashMap<String, String> getWifiList() {
+        wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        openWifi();
+        wifiManager.startScan();
+        List<ScanResult> list = wifiManager.getScanResults();
+        if (list == null) {
+            Toast.makeText(this, "wifi未打开！", Toast.LENGTH_LONG).show();
+            return null;
+        }
+        HashMap<String, String> apEntities = new HashMap<>();
+        HashMap<String, String> changeName = new HashMap<>();
+        changeName.put("Four-Faith-2", "ap1");
+        changeName.put("Four-Faith-3", "ap2");
+        changeName.put("TP-LINK_E7D2", "ap3");
+        changeName.put("TP-LINK_3625", "ap4");
+        changeName.put("TP-LINK_3051", "ap5");
+        for (ScanResult scanResult : list) {
+            if (scanResult.SSID.contains("abc"))
+                apEntities.put(changeName.get(scanResult.SSID), String.valueOf(scanResult.level));
+        }
+        return apEntities;
+    }
+
     public class MyAdapter extends BaseAdapter {
 
         LayoutInflater inflater;
@@ -178,7 +264,7 @@ public class WifiListActivity extends AppCompatActivity {
             this.inflater = LayoutInflater.from(context);
             selectedList = new ArrayList<>();
             for (ScanResult scanResult : list) {
-                if (scanResult.SSID.contains("abc"))
+                if (scanResult.SSID.contains("Faith")||scanResult.SSID.contains("TP"))
                     selectedList.add(scanResult);
             }
             this.list = selectedList;
