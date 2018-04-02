@@ -121,7 +121,7 @@
 
         </RelativeLayout>
         <Button
-            android:id="@+id/confirm_algorithm"
+            android:id="@+id/personal_info_upload"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"

@@ -93,9 +93,10 @@ public class AlgorithmActivity extends AppCompatActivity{
             // TODO Auto-generated constructor stub
             this.inflater = LayoutInflater.from(context);
             list = new ArrayList<>();
-            list.add("k近邻");
-            list.add("贝叶斯");
-            list.add("卷积神经网络");
+            list.add("k近邻绝对值");
+            list.add("k近邻相对值");
+            list.add("贝叶斯绝对值");
+            list.add("贝叶斯相对值");
             this.list = list;
         }
 

@@ -4,14 +4,18 @@ package com.fengmap.indoorPosition;
  */
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.fengmap.indoorPosition.utils.FileUtils;
 import com.fengmap.indoorPosition.utils.RoundImageView;
 import com.fengmap.indoorPosition.widget.NavigationBar;
 
@@ -31,7 +35,9 @@ public class PersonalActivity extends AppCompatActivity {
     private RoundImageView personal_portrait;
     private TextView personal_graduate_time;
     private Button personal_info_cancel;
+    private Button personal_info_upload;
     private TextView personal_device_name;
+
     private static final int PHOTO_REQUEST_GALLERY = 2;// 从相册中选择
     private static final int PHOTO_REQUEST_CUT = 3;// 结果
     private File tempFile;
@@ -76,6 +82,14 @@ public class PersonalActivity extends AppCompatActivity {
             }
         });
 
+        personal_info_upload = (Button) findViewById(R.id.personal_info_upload);
+        personal_info_upload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                doSave();
+            }
+        });
+
         personal_info_cancel = (Button) findViewById(R.id.personal_info_cancel);
         personal_info_cancel.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,6 +97,14 @@ public class PersonalActivity extends AppCompatActivity {
                 finish();
             }
         });
+    }
+
+
+    private void doSave() {
+        Bitmap portrait = ((BitmapDrawable) personal_portrait.getDrawable()).getBitmap();
+        FileUtils.saveToPre(this, portrait);
+        Toast.makeText(this,"success",Toast.LENGTH_SHORT).show();
+
     }
 
     /*

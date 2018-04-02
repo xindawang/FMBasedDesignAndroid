@@ -1,15 +1,21 @@
 package com.fengmap.indoorPosition;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.os.CountDownTimer;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.Looper;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,28 +23,43 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fengmap.android.map.geometry.FMMapCoord;
 import com.fengmap.indoorPosition.entity.APEntity;
 import com.fengmap.indoorPosition.entity.AlgoEntity;
 import com.fengmap.indoorPosition.entity.RPEntity;
 import com.fengmap.indoorPosition.httpRequest.RequestManager;
+import com.fengmap.indoorPosition.utils.JsonTool;
+
+
+import org.java_websocket.WebSocket;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import rx.Subscriber;
+import rx.functions.Action1;
+import ua.naiksoftware.stomp.LifecycleEvent;
+import ua.naiksoftware.stomp.Stomp;
+import ua.naiksoftware.stomp.client.StompClient;
+import ua.naiksoftware.stomp.client.StompMessage;
+
 
 public class WifiListActivity extends AppCompatActivity {
 
@@ -59,21 +80,53 @@ public class WifiListActivity extends AppCompatActivity {
 
     int rpCount = 1;
 
+    int count = 0;//数据采集次数
+
+    private StompClient myStompClient = null;//websocket
+
+    Handler handler;
+    Runnable runnable;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wifi_list);
         init();
+        createStompClient();
 
+        //采集数据(生成临时文件)
         store_RSSI_info = (Button) findViewById(R.id.store_RSSI_info);
         store_RSSI_info.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                buttonStoreClick();
+            public void onClick(View v) {  //一分钟采集20次、3秒一次
+                store_RSSI_info.setEnabled(false);
+                end_RSSI_info.setEnabled(false);
+                send_RSSI_info.setEnabled(false);
+                count = 0;//当前点采集计数
+                CountDownTimer cdt = new CountDownTimer(3000*100, 3000) {
+                    @Override
+                    public void onTick(long millisUntilFinished) {
                 init();
+                buttonStoreClick();//采集
+                init();
+                        MyTimerTask(1800, 600);
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        store_RSSI_info.setEnabled(true);
+                        end_RSSI_info.setEnabled(true);
+                        send_RSSI_info.setEnabled(true);
+                    }
+                };
+                cdt.start();
+
+
             }
         });
 
+
+        //结束采集数据（生成最终文件）
         end_RSSI_info = (Button) findViewById(R.id.end_RSSI_info);
         end_RSSI_info.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,6 +135,8 @@ public class WifiListActivity extends AppCompatActivity {
             }
         });
 
+
+        //上传采集数据
         send_RSSI_info = (Button) findViewById(R.id.send_RSSI_info);
         send_RSSI_info.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,6 +145,7 @@ public class WifiListActivity extends AppCompatActivity {
             }
         });
 
+        //扫描附近的wifi
         refresh_RSSI_info = (FloatingActionButton) findViewById(R.id.refresh_RSSI_info);
         refresh_RSSI_info.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -100,46 +156,28 @@ public class WifiListActivity extends AppCompatActivity {
     }
 
     private void sendInfo() {
-
-//        final HashMap<String, String> apEntities = getWifiList();
-        final HashMap<String, String> apEntities = new HashMap<>();
-        apEntities.put("ap1","-56");
-        apEntities.put("ap2","-50");
-        apEntities.put("ap3","-45");
-        apEntities.put("ap4","-35");
-        apEntities.put("ap5","-41");
-        if (apEntities == null) return;
-
-        AlgoEntity algoEntity = new AlgoEntity(algorithm_code);
-        apEntities.put("algorithm",algoEntity.getName());
-
-        final Thread httpRequest = new Thread() {
+        if (handler == null) handler=new Handler();
+        if (runnable == null)
+        runnable=new Runnable() {
             @Override
             public void run() {
-                RequestManager requestManager = RequestManager.getInstance(WifiListActivity.this);
-                positioningResult = requestManager.requestSyn("loc", 2, apEntities);
-                if (positioningResult == null) {
-                    Looper.prepare();
-                    Toast.makeText(WifiListActivity.this, "请检查服务器连接！", Toast.LENGTH_SHORT).show();
-                    Looper.loop();
-                    httpIsAvailable = false;
-                } else httpIsAvailable = true;
+
+                HashMap<String, String> map = getWifiList();
+                map.put("algorithm",String.valueOf(algorithm_code));
+                sendMessage(JsonTool.objectToJson(map));
+                Log.d("a",map.toString());
+
+                handler.postDelayed(this, 2000);
             }
         };
-
-        httpRequest.start();
-        if (httpIsAvailable) {
-            try {
-                httpRequest.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        } else return;
-
-        if (positioningResult.contains("null")) return;
-
-        Toast.makeText(WifiListActivity.this, "上传成功！", Toast.LENGTH_SHORT).show();
-
+        if (send_RSSI_info.getText().equals("开始上传")){
+            send_RSSI_info.setText("结束上传");
+            handler.postDelayed(runnable, 2000);//每两秒执行一次runnable.
+        }else {
+//            handler.removeCallbacks(runnable);
+            handler.removeCallbacksAndMessages(null);
+            send_RSSI_info.setText("开始上传");
+        }
     }
 
     public void buttonStoreClick() {
@@ -157,6 +195,7 @@ public class WifiListActivity extends AppCompatActivity {
     }
 
     public void printResult(RPEntity rpEntity) {
+        count++;
         try {
             File dir = new File(Environment.getExternalStorageDirectory(),
                     "fengmap/RSSIRecord");
@@ -166,7 +205,7 @@ public class WifiListActivity extends AppCompatActivity {
             }
 
             File file = new File(Environment.getExternalStorageDirectory(),
-                    basicPath +"tmp"+".txt");
+                    basicPath + "tmp" + ".txt");
 
             //第二个参数意义是说是否以append方式添加内容
             BufferedWriter bw = new BufferedWriter(new FileWriter(file, true));
@@ -179,8 +218,7 @@ public class WifiListActivity extends AppCompatActivity {
             }
             bw.write("\r\n" + rpCount++ + "\t" + date + "\r\n");
             bw.flush();
-            Toast.makeText(getApplicationContext(), "保存成功！",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "当前位置第" + count + "次采集，保存成功！", Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {
@@ -189,19 +227,19 @@ public class WifiListActivity extends AppCompatActivity {
     }
 
     //点击结束按钮时，重命名临时文件
-    private void renameFile(){
+    private void renameFile() {
         SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss");
         String recordDate = sDateFormat.format(new java.util.Date());
         File file = new File(Environment.getExternalStorageDirectory(),
-                basicPath +"tmp"+".txt");
-        if(file.renameTo(new File(Environment.getExternalStorageDirectory(),basicPath + recordDate + ".txt"))){
-            Toast.makeText(getApplicationContext(), "记录完毕！",Toast.LENGTH_SHORT).show();
-        }else{
-            Toast.makeText(getApplicationContext(), "记录失败，缺少采集文件！",Toast.LENGTH_SHORT).show();
+                basicPath + "tmp" + ".txt");
+        if (file.renameTo(new File(Environment.getExternalStorageDirectory(), basicPath + recordDate + ".txt"))) {
+            Toast.makeText(getApplicationContext(), "记录完毕！", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getApplicationContext(), "记录失败，缺少采集文件！", Toast.LENGTH_SHORT).show();
         }
     }
 
-        @Override
+    @Override
     public void onBackPressed() {
         finish();
     }
@@ -242,13 +280,20 @@ public class WifiListActivity extends AppCompatActivity {
         }
         HashMap<String, String> apEntities = new HashMap<>();
         HashMap<String, String> changeName = new HashMap<>();
+//        changeName.put("abc3", "ap1");
+//        changeName.put("abc4", "ap2");
+//        changeName.put("abc6", "ap3");
+//        changeName.put("abc7", "ap4");
+//        changeName.put("abc8", "ap5");
         changeName.put("Four-Faith-2", "ap1");
         changeName.put("Four-Faith-3", "ap2");
         changeName.put("TP-LINK_E7D2", "ap3");
         changeName.put("TP-LINK_3625", "ap4");
         changeName.put("TP-LINK_3051", "ap5");
+        changeName.put("TP-LINK_35EB", "ap6");
+        changeName.put("TP-LINK_5958", "ap7");
         for (ScanResult scanResult : list) {
-            if (scanResult.SSID.contains("abc"))
+            if (changeName.containsKey(scanResult.SSID))
                 apEntities.put(changeName.get(scanResult.SSID), String.valueOf(scanResult.level));
         }
         return apEntities;
@@ -263,9 +308,22 @@ public class WifiListActivity extends AppCompatActivity {
             // TODO Auto-generated constructor stub
             this.inflater = LayoutInflater.from(context);
             selectedList = new ArrayList<>();
+            HashMap<String, String> changeName = new HashMap<>();
+//            changeName.put("abc3", "ap1");
+//            changeName.put("abc4", "ap2");
+//            changeName.put("abc6", "ap3");
+//            changeName.put("abc7", "ap4");
+//            changeName.put("abc8", "ap5");
+            changeName.put("Four-Faith-2", "ap1");
+            changeName.put("Four-Faith-3", "ap2");
+            changeName.put("TP-LINK_E7D2", "ap3");
+            changeName.put("TP-LINK_3625", "ap4");
+            changeName.put("TP-LINK_3051", "ap5");
+            changeName.put("TP-LINK_35EB", "ap6");
+            changeName.put("TP-LINK_5958", "ap7");
             for (ScanResult scanResult : list) {
-                if (scanResult.SSID.contains("Faith")||scanResult.SSID.contains("TP"))
-                    selectedList.add(scanResult);
+                if (changeName.containsKey(scanResult.SSID))
+                selectedList.add(scanResult);
             }
             this.list = selectedList;
         }
@@ -333,12 +391,98 @@ public class WifiListActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
+//        noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+                Intent intent = new Intent(WifiListActivity.this,AlgorithmActivity.class);
+                // 把bundle放入intent里
+                intent.putExtra("algorithm_code", algorithm_code);
+                startActivityForResult(intent,0);
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
+
+    public void MyTimerTask(int end, int start) {
+        CountDownTimer cdt1 = new CountDownTimer(end, start) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                init();
+            }
+
+            @Override
+            public void onFinish() {
+
+            }
+        };
+        cdt1.start();
+    }
+
+
+    //websocket 建立链接 发送消息 接受消息
+    private void createStompClient() {
+        myStompClient = Stomp.over(WebSocket.class, "ws://119.29.12.63/endpointWifi/websocket");
+        myStompClient.connect();
+        myStompClient.lifecycle().subscribe(new Action1<LifecycleEvent>() {
+            @Override
+            public void call(LifecycleEvent lifecycleEvent) {
+                switch (lifecycleEvent.getType()) {
+                    case OPENED:
+                        Log.d("wifiList", "Stomp connection opened123");
+                        break;
+                    case ERROR:
+                        Log.d("wifiList", "Stomp connection error369");
+                        break;
+                    case CLOSED:
+                        Log.d("wifiList", "Stomp connection closed147");
+                        break;
+                }
+            }
+        });
+    }
+
+    private void sendMessage(String message) {
+        myStompClient.send("/app/app_wifiMessage", message)
+                .subscribe(new Subscriber<Void>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+
+                    }
+
+                    @Override
+                    public void onNext(Void aVoid) {
+
+                    }
+                });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.i("Main", "requestCode:"+requestCode+"resultCode:"+resultCode);
+        if(resultCode==1){
+            if(requestCode==0){
+                Integer code=data.getIntExtra("algorithm_code",0);
+                algorithm_code = code;
+            }
+        }
+    }
+
+//    private void registerStompTopic() {
+//        myStompClient.topic("/topic/dis_tech").subscribe(new Action1<StompMessage>() {
+//            @Override
+//            public void call(StompMessage stompMessage) {
+//
+//            }
+//        });
+//
+//    }
+
 
 }
