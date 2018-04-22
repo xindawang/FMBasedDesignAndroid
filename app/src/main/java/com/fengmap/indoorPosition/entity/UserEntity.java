@@ -1,27 +1,59 @@
 package com.fengmap.indoorPosition.entity;
 
-/**
- * Created by ACER on 2018/1/16.
- */
 
 public class UserEntity {
+    private int id;
+    private String userName;
+    private String passWord;
+    private String portrait_path;
+    private String cellPhone;
+    private String role;
 
-    private String username;
-    private String password;
-
-    public String getUsername() {
-        return username;
+    public int getId() {
+        return id;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public String getPassword() {
-        return password;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getPassWord() {
+        return passWord;
+    }
+
+    public void setPassWord(String passWord) {
+        this.passWord = passWord;
+    }
+
+    public String getPortrait_path() {
+        return portrait_path;
+    }
+
+    public void setPortrait_path(String portrait_path) {
+        this.portrait_path = portrait_path;
+    }
+
+    public String getCellPhone() {
+        return cellPhone;
+    }
+
+    public void setCellPhone(String cellPhone) {
+        this.cellPhone = cellPhone;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

@@ -334,13 +334,12 @@ public class NavActivity extends AppCompatActivity
         };
 
         httpRequest.start();
-        if (httpIsAvailable) {
-            try {
-                httpRequest.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        } else return;
+        try {
+            httpRequest.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        if (!httpIsAvailable) return;
 
         if (positioningResult.contains("null")) return;
         String[] locInfo = positioningResult.split(",");

@@ -1,6 +1,10 @@
 package com.fengmap.indoorPosition.utils;
 
 
+import android.text.TextUtils;
+
+import com.google.gson.Gson;
+
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonProcessingException;
@@ -19,6 +23,34 @@ import java.util.Map;
  */
 
 public class JsonTool {
+
+    public static Gson gson;
+    //将JSON字符串转换成javabean
+    public static <T> T parser(String json ,Class<T> tClass){
+        //判读字符串是否为空
+        if(TextUtils.isEmpty(json)){
+            return null;
+        }
+
+        if(gson==null){
+            gson = new Gson();
+        }
+        return gson.fromJson(json,tClass);
+    }
+    //将javabean转换成JSON字符串
+    public static String converJavaBeanToJson(Object obj){
+        if(obj == null){
+            return "";
+        }
+        if(gson == null){
+            gson = new Gson();
+        }
+        String beanstr = gson.toJson(obj);
+        if(!TextUtils.isEmpty(beanstr)){
+            return beanstr;
+        }
+        return "";
+    }
 
     //json to list
     public static List<Map<String, String>> jsonToListMap(String json) throws JsonParseException, JsonMappingException, IOException {

@@ -1,9 +1,11 @@
 package com.fengmap.indoorPosition;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.wifi.ScanResult;
@@ -52,6 +54,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import rx.Subscriber;
 import rx.functions.Action1;
@@ -62,6 +66,11 @@ import ua.naiksoftware.stomp.client.StompMessage;
 
 
 public class WifiListActivity extends AppCompatActivity {
+
+    //广播接收器
+    private IntentFilter intentFilter;
+    private WifiChangeReceiver wifiChangeReceiver;
+
 
     private WifiManager wifiManager;
     private List<ScanResult> list;
@@ -87,12 +96,26 @@ public class WifiListActivity extends AppCompatActivity {
     Handler handler;
     Runnable runnable;
 
+    private volatile boolean startCollect = false;//是否开始收集数据
+    private volatile boolean startSent = false;//是否开始上传实时数据
+    private final Timer timer = new Timer();
+    private TimerTask WifiTask;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wifi_list);
         init();
-        createStompClient();
+        createStompClient();//websoket
+
+        //注册广播
+        intentFilter = new IntentFilter();
+        intentFilter.addAction(wifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+
+        wifiChangeReceiver = new WifiChangeReceiver();
+        registerReceiver(wifiChangeReceiver, intentFilter);
+        WifiSan();
+
 
         //采集数据(生成临时文件)
         store_RSSI_info = (Button) findViewById(R.id.store_RSSI_info);
@@ -103,25 +126,7 @@ public class WifiListActivity extends AppCompatActivity {
                 end_RSSI_info.setEnabled(false);
                 send_RSSI_info.setEnabled(false);
                 count = 0;//当前点采集计数
-                CountDownTimer cdt = new CountDownTimer(3000*100, 3000) {
-                    @Override
-                    public void onTick(long millisUntilFinished) {
-                init();
-                buttonStoreClick();//采集
-                init();
-                        MyTimerTask(1800, 600);
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        store_RSSI_info.setEnabled(true);
-                        end_RSSI_info.setEnabled(true);
-                        send_RSSI_info.setEnabled(true);
-                    }
-                };
-                cdt.start();
-
-
+                startCollect = true;
             }
         });
 
@@ -155,28 +160,42 @@ public class WifiListActivity extends AppCompatActivity {
         });
     }
 
-    private void sendInfo() {
-        if (handler == null) handler=new Handler();
-        if (runnable == null)
-        runnable=new Runnable() {
+    private void WifiSan() {//间断100ms扫描
+        WifiTask = new TimerTask() {
             @Override
             public void run() {
-
-                HashMap<String, String> map = getWifiList();
-                map.put("algorithm",String.valueOf(algorithm_code));
-                sendMessage(JsonTool.objectToJson(map));
-                Log.d("a",map.toString());
-
-                handler.postDelayed(this, 2000);
+                wifiManager.startScan();
+                list = wifiManager.getScanResults();
+                showWifiMsg(list);
             }
         };
-        if (send_RSSI_info.getText().equals("开始上传")){
+
+        timer.schedule(WifiTask, 0, 150);
+
+    }
+
+    public void showWifiMsg(final List<ScanResult> list) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ListView listView = (ListView) findViewById(R.id.listView);
+                if (list == null) {
+                    Toast.makeText(WifiListActivity.this, "wifi未打开！", Toast.LENGTH_LONG).show();
+                } else {
+                    listView.setAdapter(new MyAdapter(WifiListActivity.this, list));
+                }
+            }
+        });
+    }
+
+
+    private void sendInfo() {
+        if (send_RSSI_info.getText().equals("开始上传")) {
             send_RSSI_info.setText("结束上传");
-            handler.postDelayed(runnable, 2000);//每两秒执行一次runnable.
-        }else {
-//            handler.removeCallbacks(runnable);
-            handler.removeCallbacksAndMessages(null);
+            startSent = true;
+        } else {
             send_RSSI_info.setText("开始上传");
+            startSent = false;
         }
     }
 
@@ -195,7 +214,6 @@ public class WifiListActivity extends AppCompatActivity {
     }
 
     public void printResult(RPEntity rpEntity) {
-        count++;
         try {
             File dir = new File(Environment.getExternalStorageDirectory(),
                     "fengmap/RSSIRecord");
@@ -280,18 +298,18 @@ public class WifiListActivity extends AppCompatActivity {
         }
         HashMap<String, String> apEntities = new HashMap<>();
         HashMap<String, String> changeName = new HashMap<>();
-//        changeName.put("abc3", "ap1");
-//        changeName.put("abc4", "ap2");
-//        changeName.put("abc6", "ap3");
-//        changeName.put("abc7", "ap4");
-//        changeName.put("abc8", "ap5");
-        changeName.put("Four-Faith-2", "ap1");
-        changeName.put("Four-Faith-3", "ap2");
-        changeName.put("TP-LINK_E7D2", "ap3");
-        changeName.put("TP-LINK_3625", "ap4");
-        changeName.put("TP-LINK_3051", "ap5");
-        changeName.put("TP-LINK_35EB", "ap6");
-        changeName.put("TP-LINK_5958", "ap7");
+        changeName.put("abc3", "ap1");
+        changeName.put("abc4", "ap2");
+        changeName.put("abc6", "ap3");
+        changeName.put("abc7", "ap4");
+        changeName.put("abc8", "ap5");
+//        changeName.put("Four-Faith-2", "ap1");
+//        changeName.put("Four-Faith-3", "ap2");
+//        changeName.put("TP-LINK_E7D2", "ap3");
+//        changeName.put("TP-LINK_3625", "ap4");
+//        changeName.put("TP-LINK_3051", "ap5");
+//        changeName.put("TP-LINK_35EB", "ap6");
+//        changeName.put("TP-LINK_5958", "ap7");
         for (ScanResult scanResult : list) {
             if (changeName.containsKey(scanResult.SSID))
                 apEntities.put(changeName.get(scanResult.SSID), String.valueOf(scanResult.level));
@@ -309,21 +327,21 @@ public class WifiListActivity extends AppCompatActivity {
             this.inflater = LayoutInflater.from(context);
             selectedList = new ArrayList<>();
             HashMap<String, String> changeName = new HashMap<>();
-//            changeName.put("abc3", "ap1");
-//            changeName.put("abc4", "ap2");
-//            changeName.put("abc6", "ap3");
-//            changeName.put("abc7", "ap4");
-//            changeName.put("abc8", "ap5");
-            changeName.put("Four-Faith-2", "ap1");
-            changeName.put("Four-Faith-3", "ap2");
-            changeName.put("TP-LINK_E7D2", "ap3");
-            changeName.put("TP-LINK_3625", "ap4");
-            changeName.put("TP-LINK_3051", "ap5");
-            changeName.put("TP-LINK_35EB", "ap6");
-            changeName.put("TP-LINK_5958", "ap7");
+            changeName.put("abc3", "ap1");
+            changeName.put("abc4", "ap2");
+            changeName.put("abc6", "ap3");
+            changeName.put("abc7", "ap4");
+            changeName.put("abc8", "ap5");
+//            changeName.put("Four-Faith-2", "ap1");
+//            changeName.put("Four-Faith-3", "ap2");
+//            changeName.put("TP-LINK_E7D2", "ap3");
+//            changeName.put("TP-LINK_3625", "ap4");
+//            changeName.put("TP-LINK_3051", "ap5");
+//            changeName.put("TP-LINK_35EB", "ap6");
+//            changeName.put("TP-LINK_5958", "ap7");
             for (ScanResult scanResult : list) {
                 if (changeName.containsKey(scanResult.SSID))
-                selectedList.add(scanResult);
+                    selectedList.add(scanResult);
             }
             this.list = selectedList;
         }
@@ -377,44 +395,24 @@ public class WifiListActivity extends AppCompatActivity {
         }
     }
 
+    //顶部菜单
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.wifi_menu, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-//        noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-                Intent intent = new Intent(WifiListActivity.this,AlgorithmActivity.class);
-                // 把bundle放入intent里
-                intent.putExtra("algorithm_code", algorithm_code);
-                startActivityForResult(intent,0);
+            Intent intent = new Intent(WifiListActivity.this, AlgorithmActivity.class);
+            // 把bundle放入intent里
+            intent.putExtra("algorithm_code", algorithm_code);
+            startActivityForResult(intent, 0);
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    public void MyTimerTask(int end, int start) {
-        CountDownTimer cdt1 = new CountDownTimer(end, start) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                init();
-            }
-
-            @Override
-            public void onFinish() {
-
-            }
-        };
-        cdt1.start();
     }
 
 
@@ -465,24 +463,51 @@ public class WifiListActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         super.onActivityResult(requestCode, resultCode, data);
-        Log.i("Main", "requestCode:"+requestCode+"resultCode:"+resultCode);
-        if(resultCode==1){
-            if(requestCode==0){
-                Integer code=data.getIntExtra("algorithm_code",0);
+        Log.i("Main", "requestCode:" + requestCode + "resultCode:" + resultCode);
+        if (resultCode == 1) {
+            if (requestCode == 0) {
+                Integer code = data.getIntExtra("algorithm_code", 0);
                 algorithm_code = code;
             }
         }
     }
 
-//    private void registerStompTopic() {
-//        myStompClient.topic("/topic/dis_tech").subscribe(new Action1<StompMessage>() {
-//            @Override
-//            public void call(StompMessage stompMessage) {
-//
-//            }
-//        });
-//
-//    }
+
+    //定义广播接收器
+    class WifiChangeReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            //判断是否开始搜集数据
+            if (startCollect) {
+                count++;
+                buttonStoreClick();
+
+                if (count >= 100) {
+                    startCollect = false;
+                    store_RSSI_info.setEnabled(true);
+                    end_RSSI_info.setEnabled(true);
+                    send_RSSI_info.setEnabled(true);
+                }
+
+            }
+            //判断是否上传
+            if (startSent) {
+                HashMap<String, String> map = getWifiList();
+                map.put("algorithm", String.valueOf(algorithm_code));
+                sendMessage(JsonTool.objectToJson(map));
+            }
+
+        }
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        //取消动态网络变化广播接收器的注册
+        unregisterReceiver(wifiChangeReceiver);
+    }
 
 
 }

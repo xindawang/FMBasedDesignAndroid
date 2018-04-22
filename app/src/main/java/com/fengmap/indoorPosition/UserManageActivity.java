@@ -38,13 +38,13 @@ public class UserManageActivity extends AppCompatActivity {
         );
 
         user_manage_username = (TextView) findViewById(R.id.user_manage_username);
-        user_manage_username.setText(UserInfo.getUserEntity().getUsername());
+        user_manage_username.setText(UserInfo.getUserEntity().getUserName());
 
         switch_account = (Button) findViewById(R.id.switch_account);
         switch_account.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                UserInfo.getUserEntity().setUsername("");
+                UserInfo.getUserEntity().setUserName("");
                 Intent intent = new Intent(UserManageActivity.this,NavActivity.class);
                 startActivity(intent);
             }
@@ -54,7 +54,7 @@ public class UserManageActivity extends AppCompatActivity {
         log_off.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                UserInfo.getUserEntity().setUsername("");
+                UserInfo.getUserEntity().setUserName("");
                 Intent intent = new Intent(UserManageActivity.this,NavActivity.class);
                 startActivity(intent);
             }

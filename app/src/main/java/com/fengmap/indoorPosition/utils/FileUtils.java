@@ -59,7 +59,7 @@ public class FileUtils {
      * @return
      */
     public static String getThemePath(String themeId) {
-        String themePath = FMDataManager.getFMThemeResourceDirectory() + themeId + File.separator + themeId + FILE_TYPE_THEME;
+        String themePath = FMDataManager.getFMThemeResourceDirectory() + themeId + FILE_TYPE_THEME;
         return themePath;
     }
 
