@@ -20,7 +20,9 @@ public class AlgoEntity {
     private void initList(){
         algorithm_list = new ArrayList<>();
         algorithm_list.add("knn");
+        algorithm_list.add("knnRel");
         algorithm_list.add("bayes");
+        algorithm_list.add("bayesRel");
     }
 
     public String getName(){

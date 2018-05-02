@@ -33,6 +33,7 @@ import android.widget.Toast;
 
 import com.fengmap.indoorPosition.entity.APEntity;
 import com.fengmap.indoorPosition.entity.AlgoEntity;
+import com.fengmap.indoorPosition.entity.ApNameEntity;
 import com.fengmap.indoorPosition.entity.RPEntity;
 import com.fengmap.indoorPosition.httpRequest.RequestManager;
 import com.fengmap.indoorPosition.utils.JsonTool;
@@ -246,7 +247,7 @@ public class WifiListActivity extends AppCompatActivity {
 
     //点击结束按钮时，重命名临时文件
     private void renameFile() {
-        SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss");
+        SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss");
         String recordDate = sDateFormat.format(new java.util.Date());
         File file = new File(Environment.getExternalStorageDirectory(),
                 basicPath + "tmp" + ".txt");
@@ -297,22 +298,9 @@ public class WifiListActivity extends AppCompatActivity {
             return null;
         }
         HashMap<String, String> apEntities = new HashMap<>();
-        HashMap<String, String> changeName = new HashMap<>();
-        changeName.put("abc3", "ap1");
-        changeName.put("abc4", "ap2");
-        changeName.put("abc6", "ap3");
-        changeName.put("abc7", "ap4");
-        changeName.put("abc8", "ap5");
-//        changeName.put("Four-Faith-2", "ap1");
-//        changeName.put("Four-Faith-3", "ap2");
-//        changeName.put("TP-LINK_E7D2", "ap3");
-//        changeName.put("TP-LINK_3625", "ap4");
-//        changeName.put("TP-LINK_3051", "ap5");
-//        changeName.put("TP-LINK_35EB", "ap6");
-//        changeName.put("TP-LINK_5958", "ap7");
         for (ScanResult scanResult : list) {
-            if (changeName.containsKey(scanResult.SSID))
-                apEntities.put(changeName.get(scanResult.SSID), String.valueOf(scanResult.level));
+            if (ApNameEntity.getMap().containsKey(scanResult.SSID))
+                apEntities.put(ApNameEntity.getMap().get(scanResult.SSID), String.valueOf(scanResult.level));
         }
         return apEntities;
     }
@@ -326,21 +314,8 @@ public class WifiListActivity extends AppCompatActivity {
             // TODO Auto-generated constructor stub
             this.inflater = LayoutInflater.from(context);
             selectedList = new ArrayList<>();
-            HashMap<String, String> changeName = new HashMap<>();
-            changeName.put("abc3", "ap1");
-            changeName.put("abc4", "ap2");
-            changeName.put("abc6", "ap3");
-            changeName.put("abc7", "ap4");
-            changeName.put("abc8", "ap5");
-//            changeName.put("Four-Faith-2", "ap1");
-//            changeName.put("Four-Faith-3", "ap2");
-//            changeName.put("TP-LINK_E7D2", "ap3");
-//            changeName.put("TP-LINK_3625", "ap4");
-//            changeName.put("TP-LINK_3051", "ap5");
-//            changeName.put("TP-LINK_35EB", "ap6");
-//            changeName.put("TP-LINK_5958", "ap7");
             for (ScanResult scanResult : list) {
-                if (changeName.containsKey(scanResult.SSID))
+                if (ApNameEntity.getMap().containsKey(scanResult.SSID))
                     selectedList.add(scanResult);
             }
             this.list = selectedList;

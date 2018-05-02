@@ -34,6 +34,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private ImageView portrait;
     private Button btn_login;
+    private Button  btn_test;
     private EditText userName;
     private EditText password;
     private ImageView unameClear;
@@ -48,17 +49,22 @@ public class HomeActivity extends AppCompatActivity {
         init();
 
         btn_login = (Button) findViewById(R.id.btn_login);
+        btn_test = (Button) findViewById(R.id.btn_test);
         FileUtils.readFromPre(this, userName, password);
         FileUtils.readFromPre(this, portrait);
         btn_login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                UserInfo.getUserEntity().setUserName(userName.getText().toString());
                 doLogin();
-                Intent intent = new Intent(HomeActivity.this, NavActivity.class);
-                startActivity(intent);
             }
         });
+        btn_test.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(HomeActivity.this, NavActivity.class);
+                        startActivity(intent);
+                    }
+                });
     }
 
     private void init() {

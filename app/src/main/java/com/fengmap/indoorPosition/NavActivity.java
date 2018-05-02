@@ -39,8 +39,14 @@ import com.fengmap.android.map.marker.FMImageMarker;
 import com.fengmap.android.map.marker.FMLineMarker;
 import com.fengmap.android.map.marker.FMSegment;
 import com.fengmap.indoorPosition.entity.AlgoEntity;
+import com.fengmap.indoorPosition.entity.ApNameEntity;
+import com.fengmap.indoorPosition.httpRequest.HttpUrlConnectionMethod;
 import com.fengmap.indoorPosition.httpRequest.RequestManager;
 import com.fengmap.indoorPosition.utils.FileUtils;
+import com.fengmap.indoorPosition.utils.JsonTool;
+import com.fengmap.indoorPosition.utils.UserInfo;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -319,11 +325,17 @@ public class NavActivity extends AppCompatActivity
         AlgoEntity algoEntity = new AlgoEntity(algorithm_code);
         apEntities.put("algorithm",algoEntity.getName());
 
+        Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
+        final String jsonInfo = gson.toJson(apEntities);
+        final String url = "http://211.67.16.39:9090/loc";
+
         final Thread httpRequest = new Thread() {
             @Override
             public void run() {
-                RequestManager requestManager = RequestManager.getInstance(NavActivity.this);
-                positioningResult = requestManager.requestSyn("loc", 2, apEntities);
+//                RequestManager requestManager = RequestManager.getInstance(NavActivity.this);
+//                positioningResult = requestManager.requestSyn("loc", 2, apEntities);
+
+                positioningResult = HttpUrlConnectionMethod.doJsonPost(url, jsonInfo);
                 if (positioningResult == null) {
                     Looper.prepare();
                     Toast.makeText(NavActivity.this, "请检查服务器连接！", Toast.LENGTH_SHORT).show();
@@ -402,8 +414,8 @@ public class NavActivity extends AppCompatActivity
         }
         HashMap<String, String> apEntities = new HashMap<>();
         for (ScanResult scanResult : list) {
-            if (scanResult.SSID.contains("abc"))
-                apEntities.put(scanResult.SSID, String.valueOf(scanResult.level));
+            if (ApNameEntity.getMap().containsKey(scanResult.SSID))
+                apEntities.put(ApNameEntity.getMap().get(scanResult.SSID), String.valueOf(scanResult.level));
         }
         return apEntities;
     }
