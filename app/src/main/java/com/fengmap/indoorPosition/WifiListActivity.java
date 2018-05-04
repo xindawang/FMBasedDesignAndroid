@@ -79,7 +79,6 @@ public class WifiListActivity extends AppCompatActivity {
 
     private Button store_RSSI_info;
     private Button end_RSSI_info;
-    private Button send_RSSI_info;
     private FloatingActionButton refresh_RSSI_info;
 
     private String basicPath = "fengmap/RSSIRecord/";
@@ -125,7 +124,6 @@ public class WifiListActivity extends AppCompatActivity {
             public void onClick(View v) {  //一分钟采集20次、3秒一次
                 store_RSSI_info.setEnabled(false);
                 end_RSSI_info.setEnabled(false);
-                send_RSSI_info.setEnabled(false);
                 count = 0;//当前点采集计数
                 startCollect = true;
             }
@@ -138,16 +136,6 @@ public class WifiListActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 renameFile();
-            }
-        });
-
-
-        //上传采集数据
-        send_RSSI_info = (Button) findViewById(R.id.send_RSSI_info);
-        send_RSSI_info.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                sendInfo();
             }
         });
 
@@ -189,16 +177,6 @@ public class WifiListActivity extends AppCompatActivity {
         });
     }
 
-
-    private void sendInfo() {
-        if (send_RSSI_info.getText().equals("开始上传")) {
-            send_RSSI_info.setText("结束上传");
-            startSent = true;
-        } else {
-            send_RSSI_info.setText("开始上传");
-            startSent = false;
-        }
-    }
 
     public void buttonStoreClick() {
         RPEntity rpEntity = new RPEntity();
@@ -260,6 +238,8 @@ public class WifiListActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        Intent intent = new Intent(WifiListActivity.this,NavActivity.class);
+        startActivity(intent);
         finish();
     }
 
@@ -373,18 +353,17 @@ public class WifiListActivity extends AppCompatActivity {
     //顶部菜单
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.wifi_menu, menu);
+        getMenuInflater().inflate(R.menu.map_wifi_menu, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            Intent intent = new Intent(WifiListActivity.this, AlgorithmActivity.class);
-            // 把bundle放入intent里
-            intent.putExtra("algorithm_code", algorithm_code);
-            startActivityForResult(intent, 0);
+        if (id == R.id.switch_method) {
+            Intent intent = new Intent(WifiListActivity.this, MapWifiListActivity.class);
+            startActivity(intent);
+            finish();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -457,11 +436,10 @@ public class WifiListActivity extends AppCompatActivity {
                 count++;
                 buttonStoreClick();
 
-                if (count >= 100) {
+                if (count >= 100 ) {
                     startCollect = false;
                     store_RSSI_info.setEnabled(true);
                     end_RSSI_info.setEnabled(true);
-                    send_RSSI_info.setEnabled(true);
                 }
 
             }

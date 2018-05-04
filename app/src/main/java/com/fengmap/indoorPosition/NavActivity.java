@@ -172,6 +172,7 @@ public class NavActivity extends AppCompatActivity
             startActivity(intent);
         } else if (id == R.id.nav_slideshow) {
             Intent intent = new Intent(NavActivity.this,WifiListActivity.class);
+            if (mFMMap != null) mFMMap.onDestroy();
             startActivity(intent);
         } else if (id == R.id.nav_manage) {
             Intent intent = new Intent(NavActivity.this,UserManageActivity.class);

@@ -64,6 +64,11 @@
             android:theme="@style/AppTheme" />
 
         <activity
+            android:name=".MapWifiListActivity"
+            android:label="地图数据采集"
+            android:theme="@style/AppTheme" />
+
+        <activity
             android:name=".AlgorithmActivity"
             android:label="@string/select_algorithm"
             android:theme="@style/AppTheme"/>

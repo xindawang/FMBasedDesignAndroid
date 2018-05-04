@@ -7,42 +7,19 @@
     android:fitsSystemWindows="true"
     tools:context="com.fengmap.indoorPosition.WifiListActivity">
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/refresh_RSSI_info"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|end"
-        android:layout_margin="@dimen/fab_margin"
-        android:src="@android:drawable/ic_popup_sync"/>
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ListView
-            android:id="@+id/listView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_above="@+id/end_RSSI_info"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginTop="0dp"
-            android:layout_marginBottom="18dp"></ListView>
 
-        <!--<Button-->
-            <!--android:id="@+id/send_RSSI_info"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_above="@+id/end_RSSI_info"-->
-            <!--android:layout_centerHorizontal="true"-->
-            <!--android:layout_marginLeft="20dp"-->
-            <!--android:layout_marginStart="20dp"-->
-            <!--android:layout_marginEnd="20dp"-->
-            <!--android:layout_marginRight="20dp"-->
-            <!--android:text="开始上传" />-->
+        <com.fengmap.android.map.FMMapView
+            android:id="@+id/map_wifi"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
 
         <Button
-            android:id="@+id/end_RSSI_info"
+            android:id="@+id/end_RSSI_info_map"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
@@ -55,7 +32,7 @@
             android:text="结束" />
 
         <Button
-            android:id="@+id/store_RSSI_info"
+            android:id="@+id/store_RSSI_info_map"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"

@@ -46,5 +46,6 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string name="action_settings">算法选择</string>
+    <string name="choose_algorithm">算法选择</string>
+    <string name="switch_method_of_data_collection">切换方式</string>
 </resources>
