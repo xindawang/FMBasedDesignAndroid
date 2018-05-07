@@ -8,6 +8,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Looper;
+import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -52,6 +53,8 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -76,6 +79,10 @@ public class NavActivity extends AppCompatActivity
     private boolean httpIsAvailable;
     private int algorithm_code;
 
+    private boolean stopPositioning =false;
+    private Timer timer;
+    private TimerTask task;
+
     public static final MediaType MEDIA_TYPE_MARKDOWN
             = MediaType.parse("text/x-markdown; charset=utf-8");
 
@@ -96,7 +103,8 @@ public class NavActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getPosition(view);
+                if (!stopPositioning)startPositioning();
+                else stopPositioning();
             }
         });
 
@@ -118,6 +126,29 @@ public class NavActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
     }
 
+    public void startPositioning(){
+        stopPositioning = true;
+        timer = new Timer();
+        task = new TimerTask() {
+            public void run() {
+                getPosition();
+            }
+        };
+        timer.schedule(task, 0, 3000);
+    }
+
+    public void stopPositioning(){
+        stopPositioning = false;
+        if (timer != null) {// 停止timer
+            timer.cancel();
+            timer = null;
+        }
+        if (task != null) {
+            task.cancel();
+            task = null;
+        }
+    }
+
     @Override
     public void onBackPressed() {
 
@@ -125,12 +156,15 @@ public class NavActivity extends AppCompatActivity
             mFMMap.onDestroy();
         }
 
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
         }
+//        else {
+//            super.onBackPressed();
+//        }
+        finish();
     }
 
     @Override
@@ -259,45 +293,46 @@ public class NavActivity extends AppCompatActivity
     @Override
     public void onMapClick(float x, float y) {
 
-        if (positioningResult == null){
-//            Looper.prepare();
-            Toast.makeText(NavActivity.this, "请先进行定位！", Toast.LENGTH_SHORT).show();
-//            Looper.loop();
-            return;
-        }
-
-        final FMPickMapCoordResult mapCoordResult = mFMMap.pickMapCoord(x, y);
-        mLineLayer.removeAll();
-        mEndImageLayer.removeAll();
-
-        String[] locInfo = positioningResult.split(",");
-        stCoord = new FMMapCoord(Double.parseDouble(locInfo[0]), Double.parseDouble(locInfo[1]));
-        endCoord = mapCoordResult.getMapCoord();
-
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.end);
-        mEndImageLayer.addMarker(setStartAndEndPic(mapCoordResult.getMapCoord(), bitmap));
-
-
-        //创建线图层
-        mLineLayer = mFMMap.getFMLayerProxy().getFMLineLayer();
-        mFMMap.addLayer(mLineLayer);                //添加线图层
-
-        //根据起始点坐标和楼层id等信息进行路径规划
-        int type = mNaviAnalyser.analyzeNavi(1, stCoord, 1, endCoord,
-                FMNaviAnalyser.FMNaviModule.MODULE_SHORTEST);
-        if (type == FMNaviAnalyser.FMRouteCalcuResult.ROUTE_SUCCESS) {
-            ArrayList<FMNaviResult> results = mNaviAnalyser.getNaviResults();
-            // 构造路径规划线所需数据
-            ArrayList<FMSegment> segments = new ArrayList<>();
-            for (FMNaviResult r : results) {
-                int groupId = r.getGroupId();
-                FMSegment s = new FMSegment(groupId, r.getPointList());
-                segments.add(s);
-            }
-            //添加LineMarker
-            FMLineMarker lineMarker = new FMLineMarker(segments);
-            mLineLayer.addMarker(lineMarker);
-        }
+        //暂时不考虑导航
+//        if (positioningResult == null){
+////            Looper.prepare();
+//            Toast.makeText(NavActivity.this, "请先进行定位！", Toast.LENGTH_SHORT).show();
+////            Looper.loop();
+//            return;
+//        }
+//
+//        final FMPickMapCoordResult mapCoordResult = mFMMap.pickMapCoord(x, y);
+//        mLineLayer.removeAll();
+//        mEndImageLayer.removeAll();
+//
+//        String[] locInfo = positioningResult.split(",");
+//        stCoord = new FMMapCoord(Double.parseDouble(locInfo[0]), Double.parseDouble(locInfo[1]));
+//        endCoord = mapCoordResult.getMapCoord();
+//
+//        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.end);
+//        mEndImageLayer.addMarker(setStartAndEndPic(mapCoordResult.getMapCoord(), bitmap));
+//
+//
+//        //创建线图层
+//        mLineLayer = mFMMap.getFMLayerProxy().getFMLineLayer();
+//        mFMMap.addLayer(mLineLayer);                //添加线图层
+//
+//        //根据起始点坐标和楼层id等信息进行路径规划
+//        int type = mNaviAnalyser.analyzeNavi(1, stCoord, 1, endCoord,
+//                FMNaviAnalyser.FMNaviModule.MODULE_SHORTEST);
+//        if (type == FMNaviAnalyser.FMRouteCalcuResult.ROUTE_SUCCESS) {
+//            ArrayList<FMNaviResult> results = mNaviAnalyser.getNaviResults();
+//            // 构造路径规划线所需数据
+//            ArrayList<FMSegment> segments = new ArrayList<>();
+//            for (FMNaviResult r : results) {
+//                int groupId = r.getGroupId();
+//                FMSegment s = new FMSegment(groupId, r.getPointList());
+//                segments.add(s);
+//            }
+//            //添加LineMarker
+//            FMLineMarker lineMarker = new FMLineMarker(segments);
+//            mLineLayer.addMarker(lineMarker);
+//        }
     }
 
     /**
@@ -317,9 +352,52 @@ public class NavActivity extends AppCompatActivity
         }
     }
 
-    public void getPosition(View view) {
+//    public void getPosition(View view) {
+//
+//        clearImageLayer();
+//        final HashMap<String, String> apEntities = getWifiList();
+//        if (apEntities == null) return;
+//
+//        AlgoEntity algoEntity = new AlgoEntity(algorithm_code);
+//        apEntities.put("algorithm",algoEntity.getName());
+//
+//        Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
+//        final String jsonInfo = gson.toJson(apEntities);
+//        final String url = "http://211.67.16.39:9090/loc";
+//
+//        final Thread httpRequest = new Thread() {
+//            @Override
+//            public void run() {
+////                RequestManager requestManager = RequestManager.getInstance(NavActivity.this);
+////                positioningResult = requestManager.requestSyn("loc", 2, apEntities);
+//
+//                positioningResult = HttpUrlConnectionMethod.doJsonPost(url, jsonInfo);
+//                if (positioningResult == null) {
+//                    Looper.prepare();
+//                    Toast.makeText(NavActivity.this, "请检查服务器连接！", Toast.LENGTH_SHORT).show();
+//                    Looper.loop();
+//                    httpIsAvailable = false;
+//                } else httpIsAvailable = true;
+//            }
+//        };
+//
+//        httpRequest.start();
+//        try {
+//            httpRequest.join();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//        if (!httpIsAvailable) return;
+//
+//        if (positioningResult.contains("null")) return;
+//        String[] locInfo = positioningResult.split(",");
+//        FMMapCoord centerCoord = new FMMapCoord(Double.parseDouble(locInfo[0]), Double.parseDouble(locInfo[1]));
+//        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.start);
+//        mStImageLayer.addMarker(setStartAndEndPic(centerCoord, bitmap));            //添加图片标志物
+//    }
 
-        clearImageLayer();
+    public void getPosition() {
+
         final HashMap<String, String> apEntities = getWifiList();
         if (apEntities == null) return;
 
@@ -337,28 +415,27 @@ public class NavActivity extends AppCompatActivity
 //                positioningResult = requestManager.requestSyn("loc", 2, apEntities);
 
                 positioningResult = HttpUrlConnectionMethod.doJsonPost(url, jsonInfo);
-                if (positioningResult == null) {
+                if (positioningResult == null || positioningResult.equals("")) {
                     Looper.prepare();
                     Toast.makeText(NavActivity.this, "请检查服务器连接！", Toast.LENGTH_SHORT).show();
                     Looper.loop();
-                    httpIsAvailable = false;
-                } else httpIsAvailable = true;
+                    stopPositioning = false;
+                    if (timer != null) {// 停止timer
+                        timer.cancel();
+                        timer = null;
+                    }
+                } else{
+                    if (positioningResult.contains("null")) return;
+                    clearImageLayer();
+                    String[] locInfo = positioningResult.split(",");
+                    FMMapCoord centerCoord = new FMMapCoord(Double.parseDouble(locInfo[0]), Double.parseDouble(locInfo[1]));
+                    Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.start);
+                    mStImageLayer.addMarker(setStartAndEndPic(centerCoord, bitmap));
+                    httpIsAvailable = true;
+                }
             }
         };
-
         httpRequest.start();
-        try {
-            httpRequest.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        if (!httpIsAvailable) return;
-
-        if (positioningResult.contains("null")) return;
-        String[] locInfo = positioningResult.split(",");
-        FMMapCoord centerCoord = new FMMapCoord(Double.parseDouble(locInfo[0]), Double.parseDouble(locInfo[1]));
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.start);
-        mStImageLayer.addMarker(setStartAndEndPic(centerCoord, bitmap));            //添加图片标志物
     }
 
     private void select_2d_3d(View view,FloatingActionButton select_2d_3d) {
@@ -381,7 +458,7 @@ public class NavActivity extends AppCompatActivity
         mImageMarker.setMarkerHeight(80);
         //设置图片垂直偏离距离
         mImageMarker.setFMImageMarkerOffsetMode(FMImageMarker.FMImageMarkerOffsetMode.FMNODE_CUSTOM_HEIGHT);
-        mImageMarker.setCustomOffsetHeight(0);
+        mImageMarker.setCustomOffsetHeight(0.2f);
         return mImageMarker;
     }
 

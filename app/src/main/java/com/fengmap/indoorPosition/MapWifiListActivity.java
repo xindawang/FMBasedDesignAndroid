@@ -47,6 +47,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -142,6 +143,7 @@ public class MapWifiListActivity extends AppCompatActivity implements OnFMMapIni
     public void onMapClick(float x, float y) {
         FMPickMapCoordResult mapCoordResult = mwFMMap.pickMapCoord(x, y);
         mwStImageLayer.removeAll();
+
         wstCoord = mapCoordResult.getMapCoord();
         if (wstCoord ==null) return;
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.start);
@@ -167,6 +169,7 @@ public class MapWifiListActivity extends AppCompatActivity implements OnFMMapIni
         mwFMMap.setRotateAngle(angle);
         int defaultLevel = 21;
         mwFMMap.setZoomLevel(defaultLevel,false);
+
     }
 
     //地图加载失败回调事件
@@ -235,7 +238,7 @@ public class MapWifiListActivity extends AppCompatActivity implements OnFMMapIni
         mImageMarker.setMarkerHeight(80);
         //设置图片垂直偏离距离
         mImageMarker.setFMImageMarkerOffsetMode(FMImageMarker.FMImageMarkerOffsetMode.FMNODE_CUSTOM_HEIGHT);
-        mImageMarker.setCustomOffsetHeight(0.1f);
+        mImageMarker.setCustomOffsetHeight(0.2f);
         return mImageMarker;
     }
 
@@ -245,6 +248,11 @@ public class MapWifiListActivity extends AppCompatActivity implements OnFMMapIni
             public void run() {
                 wifiManager.startScan();
                 list = wifiManager.getScanResults();
+                selectedList = new ArrayList<>();
+                for (ScanResult scanResult : list) {
+                    if (ApNameEntity.getMap().containsKey(scanResult.SSID))
+                        selectedList.add(scanResult);
+                }
             }
         };
 
@@ -276,6 +284,7 @@ public class MapWifiListActivity extends AppCompatActivity implements OnFMMapIni
     }
 
     public void buttonStoreClick() {
+        list = wifiManager.getScanResults();
         RPEntity rpEntity = new RPEntity();
         Set<APEntity> apEntities = new HashSet<>();
         for (ScanResult scanResult : selectedList) {
