@@ -4,20 +4,29 @@ package com.fengmap.indoorPosition;
  */
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fengmap.android.map.geometry.FMMapCoord;
+import com.fengmap.indoorPosition.entity.AlgoEntity;
+import com.fengmap.indoorPosition.httpRequest.HttpUrlConnectionMethod;
 import com.fengmap.indoorPosition.utils.FileUtils;
 import com.fengmap.indoorPosition.utils.RoundImageView;
+import com.fengmap.indoorPosition.utils.UserInfo;
 import com.fengmap.indoorPosition.widget.NavigationBar;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import org.feezu.liuli.timeselector.TimeSelector;
 
@@ -26,6 +35,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 
 /**
  * Created by ACER on 2018/1/12.
@@ -37,10 +47,13 @@ public class PersonalActivity extends AppCompatActivity {
     private Button personal_info_cancel;
     private Button personal_info_upload;
     private TextView personal_device_name;
+    private EditText nickname;
 
     private static final int PHOTO_REQUEST_GALLERY = 2;// 从相册中选择
     private static final int PHOTO_REQUEST_CUT = 3;// 结果
     private File tempFile;
+
+    private String uploadResult;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +74,8 @@ public class PersonalActivity extends AppCompatActivity {
                 startActivityForResult(intent, PHOTO_REQUEST_GALLERY);
             }
         });
+
+        nickname = (EditText) findViewById(R.id.nickname);
 
         //获取设备mac
         personal_device_name = (TextView) findViewById(R.id.personal_device_name);
@@ -103,7 +118,37 @@ public class PersonalActivity extends AppCompatActivity {
     private void doSave() {
         Bitmap portrait = ((BitmapDrawable) personal_portrait.getDrawable()).getBitmap();
         FileUtils.saveToPre(this, portrait);
-        Toast.makeText(this,"success",Toast.LENGTH_SHORT).show();
+
+        final HashMap<String, String> info = new HashMap<>();
+        info.put("username", UserInfo.getUserEntity().getUserName());
+        info.put("nickname",nickname.getText().toString());
+        info.put("macAddress",personal_device_name.getText().toString());
+        String portraitString = FileUtils.convertIconToString(portrait);
+        info.put("portrait",portraitString);
+
+        Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
+        final String jsonInfo = gson.toJson(info);
+        final String url = "http://211.67.16.39:9090/uploadPersonalInfo";
+
+        final Thread httpRequest = new Thread() {
+            @Override
+            public void run() {
+//                RequestManager requestManager = RequestManager.getInstance(NavActivity.this);
+//                positioningResult = requestManager.requestSyn("loc", 2, apEntities);
+
+
+                uploadResult = HttpUrlConnectionMethod.doJsonPost(url, jsonInfo);
+                if (uploadResult == null || uploadResult.equals("")) {
+                    Looper.prepare();
+                    Toast.makeText(PersonalActivity.this, "请检查服务器连接！", Toast.LENGTH_SHORT).show();
+                    Looper.loop();
+                } else{
+                    if (uploadResult.contains("null")) return;
+                    Toast.makeText(PersonalActivity.this,uploadResult,Toast.LENGTH_SHORT).show();
+                }
+            }
+        };
+        httpRequest.start();
 
     }
 

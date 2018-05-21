@@ -49,6 +49,8 @@ import com.fengmap.indoorPosition.utils.UserInfo;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.java_websocket.WebSocket;
+
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,6 +60,12 @@ import java.util.TimerTask;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
+import rx.Subscriber;
+import rx.functions.Action1;
+import ua.naiksoftware.stomp.LifecycleEvent;
+import ua.naiksoftware.stomp.Stomp;
+import ua.naiksoftware.stomp.client.StompClient;
+import ua.naiksoftware.stomp.client.StompMessage;
 
 public class NavActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnFMMapInitListener, OnFMMapClickListener {
@@ -83,6 +91,8 @@ public class NavActivity extends AppCompatActivity
     private Timer timer;
     private TimerTask task;
 
+    private StompClient myStompClient = null;//websocket
+
     public static final MediaType MEDIA_TYPE_MARKDOWN
             = MediaType.parse("text/x-markdown; charset=utf-8");
 
@@ -99,12 +109,18 @@ public class NavActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!stopPositioning)startPositioning();
-                else stopPositioning();
+                if (!stopPositioning){
+                    fab.setImageResource(R.drawable.ic_menu_get_mylocation);
+                    startPositioning();
+                }
+                else {
+                    fab.setImageResource(R.drawable.ic_menu_mylocation);
+                    stopPositioning();
+                }
             }
         });
 
@@ -404,6 +420,8 @@ public class NavActivity extends AppCompatActivity
         AlgoEntity algoEntity = new AlgoEntity(algorithm_code);
         apEntities.put("algorithm",algoEntity.getName());
 
+        apEntities.put("device",PersonalActivity.getMac());
+
         Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
         final String jsonInfo = gson.toJson(apEntities);
         final String url = "http://211.67.16.39:9090/loc";
@@ -411,8 +429,6 @@ public class NavActivity extends AppCompatActivity
         final Thread httpRequest = new Thread() {
             @Override
             public void run() {
-//                RequestManager requestManager = RequestManager.getInstance(NavActivity.this);
-//                positioningResult = requestManager.requestSyn("loc", 2, apEntities);
 
                 positioningResult = HttpUrlConnectionMethod.doJsonPost(url, jsonInfo);
                 if (positioningResult == null || positioningResult.equals("")) {
@@ -436,6 +452,61 @@ public class NavActivity extends AppCompatActivity
             }
         };
         httpRequest.start();
+    }
+
+    //websocket 建立链接 发送消息 接受消息
+    private void createStompClient() {
+        myStompClient = Stomp.over(WebSocket.class, "ws://119.29.12.63/endpointWifi/websocket");
+        myStompClient.connect();
+        myStompClient.lifecycle().subscribe(new Action1<LifecycleEvent>() {
+            @Override
+            public void call(LifecycleEvent lifecycleEvent) {
+                switch (lifecycleEvent.getType()) {
+                    case OPENED:
+                        Log.d("wifiList", "Stomp connection opened123");
+                        break;
+                    case ERROR:
+                        Log.d("wifiList", "Stomp connection error369");
+                        break;
+                    case CLOSED:
+                        Log.d("wifiList", "Stomp connection closed147");
+                        break;
+                }
+            }
+        });
+    }
+
+    private void sendMessage(String message) {
+        myStompClient.send("/app/app_wifiMessage", message)
+                .subscribe(new Subscriber<Void>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+
+                    }
+
+                    @Override
+                    public void onNext(Void aVoid) {
+
+                    }
+                });
+    }
+
+    private void registerStompTopic() {
+        String username = UserInfo.getUserEntity().getUserName();
+        myStompClient.topic("/iotMap/loc" + username).subscribe(new Action1<StompMessage>() {
+            @Override
+            public void call(StompMessage stompMessage) {
+                String position = stompMessage.getPayload();
+
+            }
+        });
+
     }
 
     private void select_2d_3d(View view,FloatingActionButton select_2d_3d) {
@@ -493,7 +564,7 @@ public class NavActivity extends AppCompatActivity
         HashMap<String, String> apEntities = new HashMap<>();
         for (ScanResult scanResult : list) {
             if (ApNameEntity.getMap().containsKey(scanResult.SSID))
-                apEntities.put(ApNameEntity.getMap().get(scanResult.SSID), String.valueOf(scanResult.level));
+                apEntities.put(scanResult.SSID, String.valueOf(scanResult.level));
         }
         return apEntities;
     }

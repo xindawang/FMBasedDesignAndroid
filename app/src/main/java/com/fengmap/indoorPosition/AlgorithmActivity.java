@@ -94,9 +94,12 @@ public class AlgorithmActivity extends AppCompatActivity{
             this.inflater = LayoutInflater.from(context);
             list = new ArrayList<>();
             list.add("k近邻绝对值");
-            list.add("k近邻相对值");
+            list.add("k近邻相对差值");
+            list.add("k近邻相对比值");
             list.add("贝叶斯绝对值");
-            list.add("贝叶斯相对值");
+            list.add("贝叶斯相对差值");
+            list.add("贝叶斯相对比值");
+            list.add("支持向量机");
             this.list = list;
         }
 
