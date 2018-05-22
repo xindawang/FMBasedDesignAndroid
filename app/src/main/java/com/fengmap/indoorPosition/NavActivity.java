@@ -140,6 +140,10 @@ public class NavActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        //init websocket
+        createStompClient();
+        registerStompTopic();
     }
 
     public void startPositioning(){
@@ -419,7 +423,7 @@ public class NavActivity extends AppCompatActivity
 
         AlgoEntity algoEntity = new AlgoEntity(algorithm_code);
         apEntities.put("algorithm",algoEntity.getName());
-
+        apEntities.put("username",UserInfo.getUserEntity().getUserName());
         apEntities.put("device",PersonalActivity.getMac());
 
         Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
@@ -429,26 +433,26 @@ public class NavActivity extends AppCompatActivity
         final Thread httpRequest = new Thread() {
             @Override
             public void run() {
-
-                positioningResult = HttpUrlConnectionMethod.doJsonPost(url, jsonInfo);
-                if (positioningResult == null || positioningResult.equals("")) {
-                    Looper.prepare();
-                    Toast.makeText(NavActivity.this, "请检查服务器连接！", Toast.LENGTH_SHORT).show();
-                    Looper.loop();
-                    stopPositioning = false;
-                    if (timer != null) {// 停止timer
-                        timer.cancel();
-                        timer = null;
-                    }
-                } else{
-                    if (positioningResult.contains("null")) return;
-                    clearImageLayer();
-                    String[] locInfo = positioningResult.split(",");
-                    FMMapCoord centerCoord = new FMMapCoord(Double.parseDouble(locInfo[0]), Double.parseDouble(locInfo[1]));
-                    Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.start);
-                    mStImageLayer.addMarker(setStartAndEndPic(centerCoord, bitmap));
-                    httpIsAvailable = true;
-                }
+                sendMessage(jsonInfo);
+//                positioningResult = HttpUrlConnectionMethod.doJsonPost(url, jsonInfo);
+//                if (positioningResult == null || positioningResult.equals("")) {
+//                    Looper.prepare();
+//                    Toast.makeText(NavActivity.this, "请检查服务器连接！", Toast.LENGTH_SHORT).show();
+//                    Looper.loop();
+//                    stopPositioning = false;
+//                    if (timer != null) {// 停止timer
+//                        timer.cancel();
+//                        timer = null;
+//                    }
+//                } else{
+//                    if (positioningResult.contains("null")) return;
+//                    clearImageLayer();
+//                    String[] locInfo = positioningResult.split(",");
+//                    FMMapCoord centerCoord = new FMMapCoord(Double.parseDouble(locInfo[0]), Double.parseDouble(locInfo[1]));
+//                    Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.start);
+//                    mStImageLayer.addMarker(setStartAndEndPic(centerCoord, bitmap));
+//                    httpIsAvailable = true;
+//                }
             }
         };
         httpRequest.start();
@@ -456,7 +460,7 @@ public class NavActivity extends AppCompatActivity
 
     //websocket 建立链接 发送消息 接受消息
     private void createStompClient() {
-        myStompClient = Stomp.over(WebSocket.class, "ws://119.29.12.63/endpointWifi/websocket");
+        myStompClient = Stomp.over(WebSocket.class, "ws://211.67.16.39:9090/endpointWifi/websocket");
         myStompClient.connect();
         myStompClient.lifecycle().subscribe(new Action1<LifecycleEvent>() {
             @Override
@@ -499,11 +503,20 @@ public class NavActivity extends AppCompatActivity
 
     private void registerStompTopic() {
         String username = UserInfo.getUserEntity().getUserName();
-        myStompClient.topic("/iotMap/loc" + username).subscribe(new Action1<StompMessage>() {
+        String destinationPath = "";
+        if (username ==null) destinationPath = "/iotMap/loc/";
+        else destinationPath = "/iotMap/loc/" + username;
+        myStompClient.topic(destinationPath).subscribe(new Action1<StompMessage>() {
             @Override
             public void call(StompMessage stompMessage) {
                 String position = stompMessage.getPayload();
-
+                    if (position.contains("null")) return;
+                    clearImageLayer();
+                    String[] locInfo = position.split(",");
+                    FMMapCoord centerCoord = new FMMapCoord(Double.parseDouble(locInfo[0]), Double.parseDouble(locInfo[1]));
+                    Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.start);
+                    mStImageLayer.addMarker(setStartAndEndPic(centerCoord, bitmap));
+                    httpIsAvailable = true;
             }
         });
 
